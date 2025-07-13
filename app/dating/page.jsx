@@ -295,7 +295,7 @@ const Header = ({ title, onBack, actions }) => {
           ) : (
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
-                <Heart className="w-5 h-5 text-white" />
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900 tracking-tight">zlovr</span>
             </div>
@@ -330,28 +330,48 @@ const Header = ({ title, onBack, actions }) => {
 }
 
 // Desktop Sidebar Navigation
-const DesktopSidebar = ({ activeTab, onTabChange }) => {
+const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed }) => {
   const tabs = [
     { id: "discover", icon: Heart, label: "Discover", description: "Find new people" },
     { id: "matches", icon: Users, label: "Matches", description: "Your connections" },
     { id: "messages", icon: MessageCircle, label: "Messages", description: "Chat with matches" },
     { id: "profile", icon: User, label: "Profile", description: "Edit your profile" },
-  ]
-
+  ];
   return (
-    <div className="fixed left-0 top-0 bottom-0 w-72 bg-white border-r border-gray-100 shadow-sm z-40 hidden lg:block">
-      <div className="p-6">
-        <div className="flex items-center space-x-3 mb-8">
+    <motion.div
+      className="fixed left-0 top-0 bottom-0 z-40 hidden lg:block bg-white border-r border-gray-100 shadow-sm"
+      initial={{ width: 96 }}
+      animate={{ width: collapsed ? 96 : 288 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      onMouseEnter={() => setCollapsed(false)}
+      onMouseLeave={() => setCollapsed(true)}
+    >
+      <div className={cn("overflow-hidden", collapsed ? "p-4" : "p-6")}>
+        <motion.div 
+          className={cn("flex items-center", collapsed ? "mb-6 justify-center" : "mb-8")}
+          animate={{ justifyContent: collapsed ? "center" : "flex-start" }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
-            <Heart className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-900 tracking-tight">zlovr</span>
-        </div>
-
-        <nav className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ 
+              opacity: collapsed ? 0 : 1, 
+              width: collapsed ? 0 : "auto",
+              marginLeft: collapsed ? 0 : 12
+            }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <span className="text-2xl font-bold text-gray-900 tracking-tight whitespace-nowrap">zlovr</span>
+          </motion.div>
+        </motion.div>
+        <nav className={cn(collapsed ? "-space-y-1" : "space-y-2")}>
           {tabs.map((tab) => {
-            const IconComponent = tab.icon
-            const isActive = activeTab === tab.id
+            const IconComponent = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
               <motion.button
                 key={tab.id}
@@ -359,65 +379,131 @@ const DesktopSidebar = ({ activeTab, onTabChange }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "w-full flex items-center space-x-4 p-4 rounded-2xl transition-all duration-300 text-left",
-                  isActive
+                  "w-full flex items-center rounded-2xl text-left",
+                  collapsed ? "justify-center p-1 mx-auto w-fit" : "p-4",
+                  isActive && !collapsed
                     ? "bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 shadow-sm border border-slate-200"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 )}
               >
                 <div
                   className={cn(
                     "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
                     isActive
-                      ? "bg-gradient-to-br from-slate-600 to-slate-800 text-white shadow-md"
-                      : "bg-gray-100 text-gray-600",
+                      ? "bg-gradient-to-br from-slate-600 to-slate-800 text-white"
+                      : "bg-gray-100 text-gray-600"
                   )}
                 >
                   <IconComponent className="w-5 h-5" />
                 </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-base">{tab.label}</div>
-                  <div className="text-sm opacity-70">{tab.description}</div>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ 
+                    opacity: collapsed ? 0 : 1, 
+                    width: collapsed ? 0 : "auto",
+                    marginLeft: collapsed ? 0 : 16
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden flex-1"
+                >
+                  <div className="flex-1">
+                    <div className="font-semibold text-base">{tab.label}</div>
+                    <div className="text-sm opacity-70">{tab.description}</div>
+                  </div>
+                </motion.div>
               </motion.button>
-            )
+            );
           })}
         </nav>
-
         {/* Quick Actions */}
-        <div className="mt-8 pt-6 border-t border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Actions</h3>
-          <div className="space-y-2">
+        <motion.div 
+          className={cn("border-t border-gray-100", collapsed ? "pt-4 mt-4" : "pt-6 mt-8")}
+          animate={{ marginTop: collapsed ? 16 : 32 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: collapsed ? 0 : 1, 
+              height: collapsed ? 0 : "auto"
+            }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Actions</h3>
+          </motion.div>
+          <div className={cn(collapsed ? "-space-y-1" : "space-y-2")}>
             <Button
               variant="ghost"
-              className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl p-3"
+              className={cn(
+                "w-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl",
+                collapsed ? "justify-center p-1 mx-auto w-fit" : "justify-start p-3"
+              )}
             >
               <Filter className="w-4 h-4 mr-3" />
-              Filters
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ 
+                  opacity: collapsed ? 0 : 1, 
+                  width: collapsed ? 0 : "auto"
+                }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                Filters
+              </motion.span>
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl p-3"
+              className={cn(
+                "w-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl",
+                collapsed ? "justify-center p-1 mx-auto w-fit" : "justify-start p-3"
+              )}
             >
               <Search className="w-4 h-4 mr-3" />
-              Search
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ 
+                  opacity: collapsed ? 0 : 1, 
+                  width: collapsed ? 0 : "auto"
+                }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                Search
+              </motion.span>
             </Button>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
-  )
-}
+    </motion.div>
+  );
+};
 
 // Desktop Profile Layout Component
-const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
+const DesktopProfileLayout = ({ user, onLike, onRefresh, sidebarPadWithTransition }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showLikeModal, setShowLikeModal] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [showExpandedPhoto, setShowExpandedPhoto] = useState(false)
+  const [expandedPhotoIndex, setExpandedPhotoIndex] = useState(0)
+  const [clickedPhotoRef, setClickedPhotoRef] = useState(null)
+  const photoRefs = useRef({})
 
-  const handleImageClick = (index) => {
-    setSelectedImageIndex(index)
-    setShowLikeModal(true)
+  const handleImageClick = (index, event) => {
+    const clickedElement = event.currentTarget
+    const rect = clickedElement.getBoundingClientRect()
+    setClickedPhotoRef({
+      element: clickedElement,
+      rect: {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height
+      }
+    })
+    setExpandedPhotoIndex(index)
+    setShowExpandedPhoto(true)
   }
 
   const handleLike = () => {
@@ -425,8 +511,21 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
     onLike()
   }
 
+  const closeExpandedPhoto = () => {
+    setShowExpandedPhoto(false)
+    setClickedPhotoRef(null)
+  }
+
+  const nextPhoto = () => {
+    setExpandedPhotoIndex((prev) => (prev + 1) % user.images.length)
+  }
+
+  const prevPhoto = () => {
+    setExpandedPhotoIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-7 pl-72">
+    <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-white pt-7 ${sidebarPadWithTransition}`}>
       <div className="max-w-6xl mx-auto px-8 py-4">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Side - Photos */}
@@ -436,10 +535,12 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
               {user.images.map((image, index) => (
                 <motion.div
                   key={index}
+                  ref={(el) => (photoRefs.current[index] = el)}
                   whileHover={{ scale: 1.03, y: -8 }}
                   whileTap={{ scale: 0.98 }}
                   className="relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 group"
-                  onClick={() => handleImageClick(index)}
+                  onClick={(e) => handleImageClick(index, e)}
+                  layoutId={`photo-${index}`}
                 >
                   <Image
                     src={image.url || "/placeholder.svg"}
@@ -455,7 +556,6 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
 
                   <div className="absolute bottom-4 left-4 right-4">
                     <h4 className="text-white font-bold text-lg mb-1 drop-shadow-lg">{image.title}</h4>
-                    <p className="text-white/95 text-xs line-clamp-2 leading-relaxed drop-shadow">{image.story}</p>
                   </div>
 
                   <div className="absolute top-4 right-4">
@@ -581,9 +681,117 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
         </div>
       </div>
 
+      {/* Expanded Photo Modal */}
+      <AnimatePresence>
+        {showExpandedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={closeExpandedPhoto}
+          >
+            <motion.div
+              initial={clickedPhotoRef ? {
+                x: clickedPhotoRef.rect.left - (window.innerWidth / 2) + (clickedPhotoRef.rect.width / 2),
+                y: clickedPhotoRef.rect.top - (window.innerHeight / 2) + (clickedPhotoRef.rect.height / 2),
+                width: clickedPhotoRef.rect.width,
+                height: clickedPhotoRef.rect.height,
+                scale: 1
+              } : { scale: 0.8, opacity: 0, y: 50 }}
+              animate={{
+                x: 0,
+                y: 0,
+                width: "100%",
+                height: "100%",
+                scale: 1
+              }}
+              exit={clickedPhotoRef ? {
+                x: clickedPhotoRef.rect.left - (window.innerWidth / 2) + (clickedPhotoRef.rect.width / 2),
+                y: clickedPhotoRef.rect.top - (window.innerHeight / 2) + (clickedPhotoRef.rect.height / 2),
+                width: clickedPhotoRef.rect.width,
+                height: clickedPhotoRef.rect.height,
+                scale: 1
+              } : { scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 300, 
+                damping: 25,
+                duration: 0.6
+              }}
+              className="relative max-w-4xl w-full h-[80vh] overflow-hidden shadow-2xl"
+              style={{
+                borderRadius: clickedPhotoRef ? "16px" : "24px"
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.div
+                key={expandedPhotoIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="relative w-full h-full"
+              >
+                <Image
+                  src={user.images[expandedPhotoIndex].url || "/placeholder.svg"}
+                  alt={`${user.name} - ${user.images[expandedPhotoIndex].title}`}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                />
+                
+                {/* Photo Info Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
+                  <h3 className="text-white font-bold text-3xl mb-4">{user.images[expandedPhotoIndex].title}</h3>
+                  <p className="text-white/90 text-lg leading-relaxed">{user.images[expandedPhotoIndex].story}</p>
+                </div>
+
+                {/* Navigation Buttons */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={prevPhoto}
+                  className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={nextPhoto}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </motion.button>
+
+                {/* Close Button */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={closeExpandedPhoto}
+                  className="absolute top-6 right-6 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </motion.button>
+
+                {/* Photo Counter */}
+                <div className="absolute top-6 left-6">
+                  <div className="px-4 py-2 bg-black/40 backdrop-blur-sm rounded-xl border border-white/30">
+                    <span className="text-white text-sm font-bold">
+                      {expandedPhotoIndex + 1} / {user.images.length}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Like Modal */}
       <AnimatePresence>
-        {showLikeModal && (
+        {showLikeModal && matchedUser && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -592,9 +800,10 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
             onClick={() => setShowLikeModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="bg-white rounded-3xl p-10 max-w-lg w-full text-center shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
@@ -656,11 +865,11 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
   const currentImage = user.images[currentImageIndex]
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-gray-50 pb-32">
+      <div className="w-full">
         {/* Image Section */}
-        <div className="relative">
-          <div className="relative h-[65vh] overflow-hidden">
+        <div className="relative w-full">
+          <div className="relative w-full h-[65vh] overflow-hidden rounded-none">
             <motion.div
               key={currentImageIndex}
               initial={{ opacity: 0, x: 50 }}
@@ -673,7 +882,7 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
                 src={currentImage.url || "/placeholder.svg"}
                 alt={`${user.name} - ${currentImage.title}`}
                 fill
-                className="object-cover"
+                className="object-cover w-full h-full rounded-none"
                 sizes="100vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -823,7 +1032,7 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
       </div>
 
       {/* Fixed Refresh Button */}
-      <div className="fixed bottom-24 right-6 z-40">
+      <div className="fixed bottom-28 right-6 z-40">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -1098,45 +1307,45 @@ const Chat = ({ match, onBack }) => {
   return (
     <div className="flex flex-col h-screen bg-gray-50 lg:pl-72">
       {/* Enhanced Chat Header */}
-      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-100/50 p-6 shadow-sm">
-        <div className="flex items-center space-x-4">
+      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-100/50 p-4 shadow-sm">
+        <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+            className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
+            <ArrowLeft className="w-4 h-4 text-gray-700" />
           </Button>
-          <Avatar className="w-12 h-12 ring-2 ring-gray-100">
+          <Avatar className="w-10 h-10 ring-2 ring-gray-100">
             <AvatarImage src={match.user.images[0].url || "/placeholder.svg"} alt={match.user.name} />
             <AvatarFallback className="bg-gray-100 text-gray-600 font-semibold">{match.user.name[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 tracking-tight text-lg">{match.user.name}</h3>
-            <p className="text-sm text-gray-500 font-medium">{match.user.lastSeen}</p>
+            <h3 className="font-bold text-gray-900 tracking-tight text-base">{match.user.name}</h3>
+            <p className="text-xs text-gray-500 font-medium">{match.user.lastSeen}</p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-1">
             <Button
               variant="ghost"
               size="sm"
-              className="p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
             >
-              <Phone className="w-5 h-5 text-gray-700" />
+              <Phone className="w-4 h-4 text-gray-700" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
             >
-              <Video className="w-5 h-5 text-gray-700" />
+              <Video className="w-4 h-4 text-gray-700" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
             >
-              <MoreHorizontal className="w-5 h-5 text-gray-700" />
+              <MoreHorizontal className="w-4 h-4 text-gray-700" />
             </Button>
           </div>
         </div>
@@ -1244,7 +1453,7 @@ const ProfileSettings = ({ onBack }) => {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:pl-72">
+    <div className={`min-h-screen bg-gray-50 ${sidebarPadWithTransition}`}>
       <Header title="Edit Profile" onBack={onBack} />
 
       <div className="pt-18 pb-24 px-6 max-w-2xl mx-auto">
@@ -1395,7 +1604,7 @@ const FiltersComponent = ({ onBack }) => {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:pl-72">
+    <div className={`min-h-screen bg-gray-50 ${sidebarPadWithTransition}`}>
       <Header title="Filters" onBack={onBack} />
 
       <div className="pt-18 pb-24 px-6 max-w-2xl mx-auto">
@@ -1500,7 +1709,7 @@ const FiltersComponent = ({ onBack }) => {
 }
 
 // Enhanced Bottom Navigation Component (Mobile Only)
-const BottomNavigation = ({ activeTab, onTabChange }) => {
+const BottomNavigation = ({ activeTab, onTabChange, onShowFilters }) => {
   const tabs = [
     { id: "discover", icon: Heart, label: "Discover" },
     { id: "matches", icon: Users, label: "Matches" },
@@ -1531,6 +1740,17 @@ const BottomNavigation = ({ activeTab, onTabChange }) => {
               </motion.button>
             )
           })}
+          
+          {/* Filter Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onShowFilters}
+            className="flex flex-col items-center space-y-2 p-3 rounded-2xl transition-all duration-200 text-gray-500 hover:text-gray-700"
+          >
+            <Filter className="w-6 h-6" />
+            <span className="text-xs font-semibold tracking-tight">Filters</span>
+          </motion.button>
         </div>
       </div>
     </div>
@@ -1548,6 +1768,7 @@ export default function DatingApp() {
   const [showProfile, setShowProfile] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
 
   const currentUser = users[currentUserIndex]
 
@@ -1560,6 +1781,10 @@ export default function DatingApp() {
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
+
+  // Dynamic sidebar padding class
+  const sidebarPad = !isMobile ? (sidebarCollapsed ? "pl-24" : "pl-72") : ""
+  const sidebarPadWithTransition = !isMobile ? `${sidebarPad} transition-all duration-300 ease-in-out` : ""
 
   const handleLike = () => {
     // Simulate match (30% chance)
@@ -1615,7 +1840,7 @@ export default function DatingApp() {
   if (selectedMatch) {
     return (
       <>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         <Chat match={selectedMatch} onBack={handleBackFromChat} />
       </>
     )
@@ -1625,7 +1850,7 @@ export default function DatingApp() {
   if (showProfile) {
     return (
       <>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         <ProfileSettings onBack={handleBackFromProfile} />
       </>
     )
@@ -1635,7 +1860,7 @@ export default function DatingApp() {
   if (showFilters) {
     return (
       <>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         <FiltersComponent onBack={handleBackFromFilters} />
       </>
     )
@@ -1645,7 +1870,7 @@ export default function DatingApp() {
   if (activeTab === "discover") {
     if (!currentUser) {
       return (
-        <div className={cn("min-h-screen bg-gray-50 flex items-center justify-center", !isMobile && "pl-72")}>
+        <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${sidebarPadWithTransition}`}>
           <div className="text-center space-y-6 p-8">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -1681,33 +1906,19 @@ export default function DatingApp() {
               </Button>
             </motion.div>
           </div>
-          {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
-          <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+          <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+          <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} onShowFilters={() => setShowFilters(true)} />
         </div>
       )
     }
 
     return (
       <>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         {isMobile ? (
-          <>
-            <Header
-              actions={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-2.5 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-                  onClick={() => setShowFilters(true)}
-                >
-                  <Filter className="w-5 h-5 text-gray-700" />
-                </Button>
-              }
-            />
-            <MobileProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
-          </>
+          <MobileProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
         ) : (
-          <DesktopProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
+          <DesktopProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} sidebarPadWithTransition={sidebarPadWithTransition} />
         )}
 
         {/* Match Modal */}
@@ -1715,7 +1926,7 @@ export default function DatingApp() {
           <MatchModal matchedUser={matchedUser} onClose={closeMatchModal} onMessage={handleMessage} />
         )}
 
-        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} onShowFilters={() => setShowFilters(true)} />
       </>
     )
   }
@@ -1723,15 +1934,15 @@ export default function DatingApp() {
   // Matches Tab
   if (activeTab === "matches") {
     return (
-      <div className={cn("min-h-screen bg-gray-50", !isMobile && "pl-72")}>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+      <div className={`min-h-screen bg-gray-50 ${sidebarPadWithTransition}`}>
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         <Header title="Matches" />
         <div className="pt-18 pb-32 px-6">
           <div className="max-w-2xl mx-auto">
             <MatchesList matches={mockMatches} onSelectMatch={handleSelectMatch} />
           </div>
         </div>
-        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} onShowFilters={() => setShowFilters(true)} />
       </div>
     )
   }
@@ -1739,15 +1950,15 @@ export default function DatingApp() {
   // Messages Tab
   if (activeTab === "messages") {
     return (
-      <div className={cn("min-h-screen bg-gray-50", !isMobile && "pl-72")}>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+      <div className={`min-h-screen bg-gray-50 ${sidebarPadWithTransition}`}>
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         <Header title="Messages" />
         <div className="pt-18 pb-32 px-6">
           <div className="max-w-2xl mx-auto">
             <MatchesList matches={mockMatches} onSelectMatch={handleSelectMatch} />
           </div>
         </div>
-        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} onShowFilters={() => setShowFilters(true)} />
       </div>
     )
   }
@@ -1755,8 +1966,8 @@ export default function DatingApp() {
   // Profile Tab
   if (activeTab === "profile") {
     return (
-      <div className={cn("min-h-screen bg-gray-50", !isMobile && "pl-72")}>
-        {!isMobile && <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+      <div className={`min-h-screen bg-gray-50 ${sidebarPadWithTransition}`}>
+        <DesktopSidebar activeTab={activeTab} onTabChange={setActiveTab} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
         <Header title="Profile" />
         <div className="pt-18 pb-32 px-6">
           <div className="max-w-2xl mx-auto space-y-8">
@@ -1811,7 +2022,7 @@ export default function DatingApp() {
             </Card>
           </div>
         </div>
-        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} onShowFilters={() => setShowFilters(true)} />
       </div>
     )
   }
