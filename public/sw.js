@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clubix-v1';
+const CACHE_NAME = 'zlovr-v1';
 const urlsToCache = [
     '/',
     '/manifest.json',

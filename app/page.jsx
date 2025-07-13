@@ -799,21 +799,21 @@ export default function HomePage() {
                 icon: Shield,
                 title: "Verified Profiles",
                 description: "Every profile is manually verified with photo verification and background checks.",
-                color: "from-blue-900 to-slate-900",
+                color: "from-gray-600 to-slate-800",
                 delay: "stagger-2",
               },
               {
                 icon: MessageCircle,
                 title: "Secure Messaging",
                 description: "End-to-end encrypted conversations with advanced privacy controls.",
-                color: "from-gray-700 to-gray-900",
+                color: "from-gray-600 to-slate-800",
                 delay: "stagger-3",
               },
               {
                 icon: Users,
                 title: "Relationship Goals",
                 description: "Filter by what you're seeking - from casual dates to serious relationships.",
-                color: "from-slate-700 to-blue-900",
+                color: "from-gray-600 to-slate-800",
                 delay: "stagger-4",
               },
               {
@@ -827,7 +827,7 @@ export default function HomePage() {
                 icon: Star,
                 title: "Premium Experience",
                 description: "Unlimited likes, super boosts, and priority customer support.",
-                color: "from-blue-800 to-slate-900",
+                color: "from-gray-600 to-slate-800",
                 delay: "stagger-6",
               },
             ].map((feature, index) => (
