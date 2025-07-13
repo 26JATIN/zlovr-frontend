@@ -24,6 +24,7 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
+import { useDatingLayout } from "../layout"
 
 // Mock messages data
 const mockMessages = [
@@ -84,68 +85,13 @@ const mockMatch = {
   unreadCount: 2,
 }
 
-// Enhanced Header Component
-const Header = ({ title, onBack, actions }) => {
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-18">
-          {onBack ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 sm:p-2.5 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-              onClick={onBack}
-            >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-            </Button>
-          ) : (
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">zlovr</span>
-            </div>
-          )}
-
-          {title && (
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight truncate max-w-[200px] sm:max-w-none">
-              {title}
-            </h1>
-          )}
-
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            {actions || (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-2 sm:p-2.5 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-                >
-                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-2 sm:p-2.5 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-                >
-                  <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
-  )
-}
-
 // Enhanced Chat Component
 const Chat = ({ match, onBack }) => {
   const [messages, setMessages] = useState(mockMessages)
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef(null)
+  const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -187,53 +133,40 @@ const Chat = ({ match, onBack }) => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Enhanced Chat Header */}
-      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-100/50 p-3 sm:p-4 shadow-sm">
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            className="p-1.5 sm:p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-          >
-            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
-          </Button>
-          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 ring-2 ring-gray-100">
-            <AvatarImage src={match.user.images[0].url || "/placeholder.svg"} alt={match.user.name} />
-            <AvatarFallback className="bg-gray-100 text-gray-600 font-semibold text-sm sm:text-base">{match.user.name[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-gray-900 tracking-tight text-sm sm:text-base truncate">{match.user.name}</h3>
-            <p className="text-xs text-gray-500 font-medium truncate">{match.user.lastSeen}</p>
-          </div>
-          <div className="flex space-x-0.5 sm:space-x-1">
+      <Header 
+        title={match.user.name}
+        onBack={onBack}
+        sidebarCollapsed={sidebarCollapsed}
+        isMobile={isMobile}
+        actions={
+          <div className="flex space-x-1">
             <Button
               variant="ghost"
               size="sm"
-              className="p-1.5 sm:p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
             >
-              <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+              <Phone className="w-4 h-4 text-gray-700" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="p-1.5 sm:p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
             >
-              <Video className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+              <Video className="w-4 h-4 text-gray-700" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="p-1.5 sm:p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
             >
-              <MoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+              <MoreHorizontal className="w-4 h-4 text-gray-700" />
             </Button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Enhanced Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 pt-20">
         {messages.map((message, index) => (
           <motion.div
             key={message.id}
@@ -356,6 +289,7 @@ const MessagesPageContent = () => {
 // Messages List Component
 const MessagesList = ({ onSelectMatch }) => {
   const router = useRouter()
+  const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
   
   // Mock conversations data
   const conversations = [
@@ -438,81 +372,84 @@ const MessagesList = ({ onSelectMatch }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-100/50 p-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Messages</h1>
+      <Header 
+        title="Messages"
+        sidebarCollapsed={sidebarCollapsed}
+        isMobile={isMobile}
+        actions={
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/dating/matches")}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200"
           >
             View Matches
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Messages List */}
-      <div className="p-4 space-y-4">
-        {conversations.length > 0 ? (
-          conversations.map((conversation, index) => (
-            <motion.div
-              key={conversation.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center space-x-4 p-4 bg-white rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 transform hover:scale-[1.02] active:scale-[0.98]"
-              onClick={() => onSelectMatch(conversation)}
-            >
-              <div className="relative">
-                <Avatar className="w-16 h-16 ring-2 ring-gray-100">
-                  <AvatarImage src={conversation.user.images[0].url || "/placeholder.svg"} alt={conversation.user.name} />
-                  <AvatarFallback className="bg-gray-100 text-gray-600 font-semibold">{conversation.user.name[0]}</AvatarFallback>
-                </Avatar>
-                {conversation.user.online && (
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
-                )}
-              </div>
+      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto space-y-4">
+          {conversations.length > 0 ? (
+            conversations.map((conversation, index) => (
+              <motion.div
+                key={conversation.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center space-x-4 p-4 bg-white rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 transform hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => onSelectMatch(conversation)}
+              >
+                <div className="relative">
+                  <Avatar className="w-16 h-16 ring-2 ring-gray-100">
+                    <AvatarImage src={conversation.user.images[0].url || "/placeholder.svg"} alt={conversation.user.name} />
+                    <AvatarFallback className="bg-gray-100 text-gray-600 font-semibold">{conversation.user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  {conversation.user.online && (
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+                  )}
+                </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-gray-900 truncate text-lg tracking-tight">{conversation.user.name}</h3>
-                    {conversation.user.verified && (
-                      <Shield className="w-4 h-4 text-blue-500" />
-                    )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-bold text-gray-900 truncate text-lg tracking-tight">{conversation.user.name}</h3>
+                      {conversation.user.verified && (
+                        <Shield className="w-4 h-4 text-blue-500" />
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">
+                      {new Date(conversation.lastMessage.timestamp).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500 font-medium">
-                    {new Date(conversation.lastMessage.timestamp).toLocaleDateString()}
-                  </span>
+                  <p className="text-sm text-gray-600 truncate font-medium mt-1">{conversation.lastMessage.text}</p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <MapPin className="w-3 h-3 text-gray-400" />
+                    <span className="text-xs text-gray-500">{conversation.user.location}</span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 truncate font-medium mt-1">{conversation.lastMessage.text}</p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <MapPin className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs text-gray-500">{conversation.user.location}</span>
-                </div>
-              </div>
 
-              {conversation.unreadCount > 0 && (
-                <Badge className="bg-red-500 text-white min-w-[24px] h-6 rounded-full text-xs flex items-center justify-center font-bold shadow-sm">
-                  {conversation.unreadCount}
-                </Badge>
-              )}
-            </motion.div>
-          ))
-        ) : (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="w-8 h-8 text-gray-400" />
+                {conversation.unreadCount > 0 && (
+                  <Badge className="bg-red-500 text-white min-w-[24px] h-6 rounded-full text-xs flex items-center justify-center font-bold shadow-sm">
+                    {conversation.unreadCount}
+                  </Badge>
+                )}
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages yet</h3>
+              <p className="text-gray-600 mb-6">Start a conversation with your matches!</p>
+              <Button onClick={() => router.push("/dating/matches")}>
+                View Matches
+              </Button>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages yet</h3>
-            <p className="text-gray-600 mb-6">Start a conversation with your matches!</p>
-            <Button onClick={() => router.push("/dating/matches")}>
-              View Matches
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )

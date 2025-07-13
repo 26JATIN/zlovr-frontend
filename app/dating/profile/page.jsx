@@ -35,6 +35,7 @@ import {
 import Image from "next/image"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
+import { useDatingLayout } from "../layout"
 
 // Interest icons mapping
 const interestIcons = {
@@ -61,63 +62,9 @@ const interestIcons = {
   Coding: Code,
 }
 
-// Enhanced Header Component
-const Header = ({ title, onBack, actions }) => {
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16 lg:h-18">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            {onBack && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onBack}
-                className="p-1.5 sm:p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95 -ml-1"
-              >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-              </Button>
-            )}
-            <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
-            </div>
-            <span className="text-base sm:text-lg md:text-xl font-bold text-gray-900 tracking-tight">zlovr</span>
-          </div>
-
-          {title && (
-            <h1 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 tracking-tight truncate max-w-[120px] xs:max-w-[150px] sm:max-w-[200px] md:max-w-none">
-              {title}
-            </h1>
-          )}
-
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            {actions || (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1.5 sm:p-2 md:p-2.5 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-                >
-                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1.5 sm:p-2 md:p-2.5 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-                >
-                  <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
-  )
-}
-
 // Enhanced Profile Settings Component
 const ProfileSettings = ({ onBack }) => {
+  const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
   const [profile, setProfile] = useState({
     name: "John",
     age: 28,
@@ -130,9 +77,14 @@ const ProfileSettings = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Edit Profile" onBack={onBack} />
+      <Header 
+        title="Edit Profile" 
+        onBack={onBack}
+        sidebarCollapsed={sidebarCollapsed}
+        isMobile={isMobile}
+      />
 
-      <div className="pt-14 sm:pt-16 lg:pt-18 pb-20 sm:pb-24 px-3 sm:px-4 md:px-6 max-w-2xl mx-auto">
+      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6 max-w-2xl mx-auto">
         <div className="space-y-6 sm:space-y-8">
           {/* Enhanced Profile Photos */}
           <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
@@ -271,6 +223,7 @@ const ProfileSettings = ({ onBack }) => {
 
 export default function ProfilePage() {
   const [showEditProfile, setShowEditProfile] = useState(false)
+  const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
 
   if (showEditProfile) {
     return <ProfileSettings onBack={() => setShowEditProfile(false)} />
@@ -278,8 +231,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Profile" />
-      <div className="pt-14 sm:pt-16 lg:pt-18 pb-24 sm:pb-32 px-3 sm:px-4 md:px-6">
+      <Header 
+        title="Profile"
+        sidebarCollapsed={sidebarCollapsed}
+        isMobile={isMobile}
+      />
+      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
           {/* Enhanced Profile Preview */}
           <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
