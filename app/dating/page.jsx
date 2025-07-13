@@ -426,23 +426,19 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-18 pl-72">
-      <div className="max-w-6xl mx-auto px-8 py-12">
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-7 pl-72">
+      <div className="max-w-6xl mx-auto px-8 py-4">
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Side - Photos */}
-          <div className="space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Discover {user.name}</h2>
-              <p className="text-gray-600 text-lg">Get to know her through her stories</p>
-            </div>
+          <div className="space-y-4">
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4">
               {user.images.map((image, index) => (
                 <motion.div
                   key={index}
                   whileHover={{ scale: 1.03, y: -8 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-500 group"
+                  className="relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 group"
                   onClick={() => handleImageClick(index)}
                 >
                   <Image
@@ -457,21 +453,21 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <h4 className="text-white font-bold text-xl mb-2 drop-shadow-lg">{image.title}</h4>
-                    <p className="text-white/95 text-sm line-clamp-3 leading-relaxed drop-shadow">{image.story}</p>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h4 className="text-white font-bold text-lg mb-1 drop-shadow-lg">{image.title}</h4>
+                    <p className="text-white/95 text-xs line-clamp-2 leading-relaxed drop-shadow">{image.story}</p>
                   </div>
 
-                  <div className="absolute top-6 right-6">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 group-hover:bg-pink-500/80 transition-all duration-300">
-                      <Heart className="w-6 h-6 text-white group-hover:fill-current" />
+                  <div className="absolute top-4 right-4">
+                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 group-hover:bg-pink-500/80 transition-all duration-300">
+                      <Heart className="w-5 h-5 text-white group-hover:fill-current" />
                     </div>
                   </div>
 
                   {/* Photo number indicator */}
-                  <div className="absolute top-6 left-6">
-                    <div className="w-8 h-8 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
-                      <span className="text-white text-sm font-bold">{index + 1}</span>
+                  <div className="absolute top-4 left-4">
+                    <div className="w-6 h-6 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                      <span className="text-white text-xs font-bold">{index + 1}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -480,8 +476,8 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
           </div>
 
           {/* Right Side - Profile Info */}
-          <div className="space-y-8 lg:sticky lg:top-32">
-            <div className="bg-white rounded-3xl p-10 shadow-xl border border-gray-100/50 backdrop-blur-sm">
+          <div className="space-y-6 lg:sticky lg:top-24">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100/50 backdrop-blur-sm">
               <div className="flex items-start justify-between mb-8">
                 <div className="flex items-center space-x-6">
                   <div className="relative">
@@ -511,46 +507,46 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
                 </div>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div>
-                  <div className="flex items-center space-x-3 mb-4">
-                    <Quote className="w-6 h-6 text-slate-600" />
-                    <h3 className="font-bold text-gray-900 text-xl">About Me</h3>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Quote className="w-5 h-5 text-slate-600" />
+                    <h3 className="font-bold text-gray-900 text-lg">About Me</h3>
                   </div>
-                  <p className="text-gray-700 leading-relaxed text-lg font-medium bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                  <p className="text-gray-700 leading-relaxed font-medium bg-gray-50 p-4 rounded-2xl border border-gray-100">
                     {user.bio}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-3 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <Briefcase className="w-5 h-5 text-slate-600" />
-                      <span className="font-bold text-gray-900">Work</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <Briefcase className="w-4 h-4 text-slate-600" />
+                      <span className="font-bold text-gray-900 text-sm">Work</span>
                     </div>
-                    <p className="text-gray-700 font-medium">{user.job}</p>
+                    <p className="text-gray-700 font-medium text-sm">{user.job}</p>
                   </div>
-                  <div className="space-y-3 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <GraduationCap className="w-5 h-5 text-slate-600" />
-                      <span className="font-bold text-gray-900">Education</span>
+                  <div className="space-y-2 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <GraduationCap className="w-4 h-4 text-slate-600" />
+                      <span className="font-bold text-gray-900 text-sm">Education</span>
                     </div>
-                    <p className="text-gray-700 font-medium">{user.education}</p>
+                    <p className="text-gray-700 font-medium text-sm">{user.education}</p>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-4 text-xl">Interests & Hobbies</h3>
-                  <div className="flex flex-wrap gap-3">
+                  <h3 className="font-bold text-gray-900 mb-3 text-lg">Interests & Hobbies</h3>
+                  <div className="flex flex-wrap gap-2">
                     {user.interests.map((interest, index) => {
                       const IconComponent = interestIcons[interest] || Heart
                       return (
                         <motion.span
                           key={index}
                           whileHover={{ scale: 1.05 }}
-                          className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-2xl text-sm font-semibold text-slate-700 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300"
+                          className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl text-xs font-semibold text-slate-700 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300"
                         >
-                          <IconComponent className="w-4 h-4" />
+                          <IconComponent className="w-3 h-3" />
                           <span>{interest}</span>
                         </motion.span>
                       )
