@@ -843,22 +843,46 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh, sidebarPadWithTransitio
 // Mobile Profile Layout Component
 const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [showLikeModal, setShowLikeModal] = useState(false)
+  const [slideDirection, setSlideDirection] = useState(0) // -1 for left, 1 for right, 0 for initial
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
 
   const nextImage = () => {
+    setSlideDirection(1)
     setCurrentImageIndex((prev) => (prev + 1) % user.images.length)
   }
 
   const prevImage = () => {
+    setSlideDirection(-1)
     setCurrentImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
   }
 
-  const handleImageTap = () => {
-    setShowLikeModal(true)
+  const handleDragStart = () => {
+    setIsDragging(true)
+  }
+
+  const handleDrag = (event, info) => {
+    setDragOffset(info.offset.x)
+  }
+
+  const handleDragEnd = (event, info) => {
+    setIsDragging(false)
+    setDragOffset(0)
+    
+    // Simple threshold - any significant movement triggers one image change
+    const swipeThreshold = 30
+    
+    if (info.offset.x > swipeThreshold) {
+      // Swipe right - go to previous
+      prevImage()
+    } else if (info.offset.x < -swipeThreshold) {
+      // Swipe left - go to next
+      nextImage()
+    }
+    // If movement is too small, it stays on current image
   }
 
   const handleLike = () => {
-    setShowLikeModal(false)
     onLike()
   }
 
@@ -870,33 +894,33 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
         {/* Image Section */}
         <div className="relative w-full">
           <div className="relative w-full h-[65vh] overflow-hidden rounded-none">
+            {/* Simple gallery with single image display */}
             <motion.div
-              key={currentImageIndex}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              className="relative h-full cursor-pointer"
-              onClick={handleImageTap}
+              className="relative h-full"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.1}
+              onDragStart={handleDragStart}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+              whileDrag={{ 
+                scale: 0.98,
+                transition: { duration: 0.1 }
+              }}
+              dragTransition={{ 
+                bounceStiffness: 600, 
+                bounceDamping: 20 
+              }}
             >
               <Image
-                src={currentImage.url || "/placeholder.svg"}
-                alt={`${user.name} - ${currentImage.title}`}
+                src={user.images[currentImageIndex].url || "/placeholder.svg"}
+                alt={`${user.name} - ${user.images[currentImageIndex].title}`}
                 fill
                 className="object-cover w-full h-full rounded-none"
                 sizes="100vw"
+                priority={true}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
-              {/* Tap indicator */}
-              <div className="absolute top-6 right-6">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 shadow-lg"
-                >
-                  <Heart className="w-6 h-6 text-white" />
-                </motion.div>
-              </div>
 
               {/* Photo counter */}
               <div className="absolute top-6 left-6">
@@ -908,26 +932,8 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
               </div>
             </motion.div>
 
-            {/* Navigation buttons */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </motion.button>
-
             {/* Image indicators */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
               {user.images.map((_, index) => (
                 <motion.div
                   key={index}
@@ -945,8 +951,8 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
 
           {/* Story Section */}
           <div className="bg-white p-6 shadow-lg border-t border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">{currentImage.title}</h3>
-            <p className="text-gray-700 leading-relaxed text-base">{currentImage.story}</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">{user.images[currentImageIndex].title}</h3>
+            <p className="text-gray-700 leading-relaxed text-base">{user.images[currentImageIndex].story}</p>
           </div>
         </div>
 
@@ -1031,8 +1037,8 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
         </div>
       </div>
 
-      {/* Fixed Refresh Button */}
-      <div className="fixed bottom-28 right-6 z-40">
+      {/* Fixed Bottom Buttons */}
+      <div className="fixed bottom-28 left-6 z-40">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -1042,53 +1048,17 @@ const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
           <RefreshCw className="w-7 h-7" />
         </motion.button>
       </div>
-
-      {/* Like Modal */}
-      <AnimatePresence>
-        {showLikeModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
-            onClick={() => setShowLikeModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="space-y-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-red-500 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                  <Heart className="w-10 h-10 text-white fill-current" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Like this photo?</h3>
-                  <p className="text-gray-600">Show {user.name} that you're interested!</p>
-                </div>
-                <div className="space-y-3">
-                  <Button
-                    onClick={handleLike}
-                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-2xl py-3 shadow-lg"
-                  >
-                    <Heart className="w-4 h-4 mr-2 fill-current" />
-                    Send Like
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowLikeModal(false)}
-                    className="w-full border-2 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-2xl py-2 font-semibold"
-                  >
-                    Maybe Later
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
+      <div className="fixed bottom-28 right-6 z-40">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLike}
+          className="w-16 h-16 bg-gradient-to-br from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white shadow-xl hover:shadow-2xl transition-all duration-300"
+        >
+          <Heart className="w-7 h-7 fill-current" />
+        </motion.button>
+      </div>
     </div>
   )
 }
