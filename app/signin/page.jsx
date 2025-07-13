@@ -102,6 +102,8 @@ export default function AuthPage() {
             setIsLoading(true)
             await new Promise((r) => setTimeout(r, 1500))
             setIsLoading(false)
+            // Redirect to dating page after successful sign in
+            router.push("/dating")
           }}
           className="space-y-6"
         >
