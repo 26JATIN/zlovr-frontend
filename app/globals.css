@@ -32,6 +32,93 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Remove default focus outlines */
+  *:focus {
+    outline: none !important;
+  }
+  
+  /* Custom focus styles for better accessibility */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5) !important;
+    outline-offset: 2px !important;
+    border-radius: 0.375rem !important;
+  }
+  
+  /* Remove focus outline from specific interactive elements */
+  button:focus,
+  .btn:focus,
+  [role="button"]:focus,
+  .interactive:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Custom focus for buttons with subtle ring */
+  button:focus-visible,
+  .btn:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.3) !important;
+    outline-offset: 2px !important;
+    border-radius: 0.5rem !important;
+  }
+  
+  /* Remove focus from motion buttons and interactive elements */
+  [data-motion]:focus,
+  .motion-button:focus,
+  .nav-item:focus {
+    outline: none !important;
+  }
+  
+  /* Custom focus for navigation items */
+  .nav-item:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.4) !important;
+    outline-offset: 2px !important;
+    border-radius: 0.5rem !important;
+  }
+  
+  /* Remove focus from framer-motion components */
+  [data-framer-motion]:focus,
+  [data-framer-component]:focus {
+    outline: none !important;
+  }
+  
+  /* Remove focus from specific dating app components */
+  .avatar:focus,
+  .match-card:focus,
+  .message-bubble:focus,
+  .nav-button:focus,
+  .sidebar-item:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Custom focus for important interactive elements */
+  .avatar:focus-visible,
+  .match-card:focus-visible,
+  .message-bubble:focus-visible,
+  .nav-button:focus-visible,
+  .sidebar-item:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.3) !important;
+    outline-offset: 2px !important;
+    border-radius: 0.5rem !important;
+  }
+  
+  /* Remove focus from all motion components */
+  [style*="transform"]:focus,
+  [style*="transition"]:focus {
+    outline: none !important;
+  }
+  
+  /* Ensure no focus outline on clickable elements */
+  [onClick]:focus,
+  [onclick]:focus {
+    outline: none !important;
+  }
 }
 
 @layer utilities {

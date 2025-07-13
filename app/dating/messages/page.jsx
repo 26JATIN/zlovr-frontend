@@ -16,10 +16,14 @@ import {
   Bell,
   Settings,
   Sparkles,
+  Shield,
+  MapPin,
+  MessageCircle,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 
 // Mock messages data
 const mockMessages = [
@@ -333,26 +337,182 @@ const MessagesPageContent = () => {
 
   const handleBackFromChat = () => {
     setSelectedMatch(null)
-    router.push("/dating/matches")
+    router.push("/dating/messages")
   }
 
-  // Show messages list (redirect to matches for now)
-  useEffect(() => {
-    if (!matchId) {
-      router.push("/dating/matches")
-    }
-  }, [matchId, router])
+  const handleSelectMatch = (match) => {
+    router.push(`/dating/messages?match=${match.id}`)
+  }
 
   // Show chat if a match is selected
   if (selectedMatch) {
     return <Chat match={selectedMatch} onBack={handleBackFromChat} />
   }
 
+  // Show messages list when no match is selected
+  return <MessagesList onSelectMatch={handleSelectMatch} />
+}
+
+// Messages List Component
+const MessagesList = ({ onSelectMatch }) => {
+  const router = useRouter()
+  
+  // Mock conversations data
+  const conversations = [
+    {
+      id: 1,
+      user: {
+        id: 1,
+        name: "Emma",
+        age: 26,
+        location: "2 miles away",
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop&crop=face",
+            title: "Weekend Adventures",
+          },
+        ],
+        verified: true,
+        online: true,
+        lastSeen: "Active now",
+      },
+      matchedAt: "2024-01-15T10:30:00Z",
+      lastMessage: {
+        text: "Hey! Thanks for the match 😊",
+        timestamp: "2024-01-15T14:30:00Z",
+        sender: "them",
+      },
+      unreadCount: 2,
+    },
+    {
+      id: 2,
+      user: {
+        id: 2,
+        name: "Sofia",
+        age: 24,
+        location: "5 miles away",
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop&crop=face",
+            title: "Creative Process",
+          },
+        ],
+        verified: true,
+        online: false,
+        lastSeen: "2 hours ago",
+      },
+      matchedAt: "2024-01-14T16:45:00Z",
+      lastMessage: {
+        text: "Would love to check out that art gallery you mentioned!",
+        timestamp: "2024-01-14T18:20:00Z",
+        sender: "me",
+      },
+      unreadCount: 0,
+    },
+    {
+      id: 3,
+      user: {
+        id: 3,
+        name: "Lisa",
+        age: 28,
+        location: "1 mile away",
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=600&fit=crop&crop=face",
+            title: "Morning Miles",
+          },
+        ],
+        verified: false,
+        online: true,
+        lastSeen: "Active now",
+      },
+      matchedAt: "2024-01-13T09:15:00Z",
+      lastMessage: {
+        text: "That hiking trail looks amazing! When are you free to go?",
+        timestamp: "2024-01-13T11:45:00Z",
+        sender: "them",
+      },
+      unreadCount: 1,
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Select a match to start chatting</h2>
-        <Button onClick={() => router.push("/dating/matches")}>Go to Matches</Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-xl border-b border-gray-100/50 p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Messages</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/dating/matches")}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            View Matches
+          </Button>
+        </div>
+      </div>
+
+      {/* Messages List */}
+      <div className="p-4 space-y-4">
+        {conversations.length > 0 ? (
+          conversations.map((conversation, index) => (
+            <motion.div
+              key={conversation.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex items-center space-x-4 p-4 bg-white rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 transform hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => onSelectMatch(conversation)}
+            >
+              <div className="relative">
+                <Avatar className="w-16 h-16 ring-2 ring-gray-100">
+                  <AvatarImage src={conversation.user.images[0].url || "/placeholder.svg"} alt={conversation.user.name} />
+                  <AvatarFallback className="bg-gray-100 text-gray-600 font-semibold">{conversation.user.name[0]}</AvatarFallback>
+                </Avatar>
+                {conversation.user.online && (
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-bold text-gray-900 truncate text-lg tracking-tight">{conversation.user.name}</h3>
+                    {conversation.user.verified && (
+                      <Shield className="w-4 h-4 text-blue-500" />
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">
+                    {new Date(conversation.lastMessage.timestamp).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 truncate font-medium mt-1">{conversation.lastMessage.text}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <MapPin className="w-3 h-3 text-gray-400" />
+                  <span className="text-xs text-gray-500">{conversation.user.location}</span>
+                </div>
+              </div>
+
+              {conversation.unreadCount > 0 && (
+                <Badge className="bg-red-500 text-white min-w-[24px] h-6 rounded-full text-xs flex items-center justify-center font-bold shadow-sm">
+                  {conversation.unreadCount}
+                </Badge>
+              )}
+            </motion.div>
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages yet</h3>
+            <p className="text-gray-600 mb-6">Start a conversation with your matches!</p>
+            <Button onClick={() => router.push("/dating/matches")}>
+              View Matches
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

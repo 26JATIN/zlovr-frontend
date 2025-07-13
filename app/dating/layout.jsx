@@ -1,13 +1,42 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Heart, MessageCircle, Filter, Settings, User, ArrowLeft, Users, Music, Book, Dumbbell, Plane, Coffee, Dog, Gamepad2, Palette, Code, Mountain, Utensils, CameraIcon, Film, Headphones, Briefcase, GraduationCap, RefreshCw, Quote, Search, Sparkles, Bell } from 'lucide-react'
+import { 
+  Heart, 
+  MessageCircle, 
+  Filter, 
+  Settings, 
+  User, 
+  ArrowLeft, 
+  Users, 
+  Music, 
+  Book, 
+  Dumbbell, 
+  Plane, 
+  Coffee, 
+  Dog, 
+  Gamepad2, 
+  Palette, 
+  Code, 
+  Mountain, 
+  Utensils, 
+  CameraIcon, 
+  Film, 
+  Headphones, 
+  Briefcase, 
+  GraduationCap, 
+  RefreshCw, 
+  Quote, 
+  Search, 
+  Sparkles, 
+  Bell,
+  LogOut
+} from 'lucide-react'
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Suspense } from "react"
 import { FilterModal } from "@/components/filter-modal"
 
 // Enhanced Header Component
@@ -87,7 +116,7 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
       className="fixed left-0 top-0 bottom-0 z-40 hidden lg:block bg-white border-r border-gray-100 shadow-sm"
       initial={{ width: 96 }}
       animate={{ width: collapsed ? 96 : 288 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
       onMouseEnter={() => setCollapsed(false)}
       onMouseLeave={() => setCollapsed(true)}
     >
@@ -95,7 +124,7 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
         <motion.div 
           className={cn("flex items-center", collapsed ? "mb-6 justify-center" : "mb-8")}
           animate={{ justifyContent: collapsed ? "center" : "flex-start" }}
-          transition={{ duration: 0.3 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
             <Sparkles className="w-5 h-5 text-white" />
@@ -107,7 +136,7 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
               width: collapsed ? 0 : "auto",
               marginLeft: collapsed ? 0 : 12
             }}
-            transition={{ duration: 0.3 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
             className="overflow-hidden"
           >
             <span className="text-2xl font-bold text-gray-900 tracking-tight whitespace-nowrap">zlovr</span>
@@ -124,7 +153,7 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleTabClick(tab)}
                 className={cn(
-                  "w-full flex items-center rounded-2xl text-left",
+                  "w-full flex items-center rounded-2xl text-left h-14",
                   collapsed ? "justify-center p-1 mx-auto w-fit" : "p-4",
                   isActive && !collapsed
                     ? "bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 shadow-sm border border-slate-200"
@@ -148,12 +177,12 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
                     width: collapsed ? 0 : "auto",
                     marginLeft: collapsed ? 0 : 16
                   }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
                   className="overflow-hidden flex-1"
                 >
-                  <div className="flex-1">
-                    <div className="font-semibold text-base">{tab.label}</div>
-                    <div className="text-sm opacity-70">{tab.description}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-base truncate">{tab.label}</div>
+                    <div className="text-sm opacity-70 truncate">{tab.description}</div>
                   </div>
                 </motion.div>
               </motion.button>
@@ -164,7 +193,7 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
         <motion.div 
           className={cn("border-t border-gray-100", collapsed ? "pt-4 mt-4" : "pt-6 mt-8")}
           animate={{ marginTop: collapsed ? 16 : 32 }}
-          transition={{ duration: 0.3 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
         >
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -172,31 +201,54 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
               opacity: collapsed ? 0 : 1, 
               height: collapsed ? 0 : "auto"
             }}
-            transition={{ duration: 0.3 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
             className="overflow-hidden"
           >
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Actions</h3>
           </motion.div>
           <div className={cn(collapsed ? "-space-y-1" : "space-y-2")}>
-            <div className={cn(
-              "w-full",
-              collapsed ? "flex justify-center" : ""
-            )}>
-              <FilterModal 
-                onFiltersChange={onFiltersChange}
-                currentFilters={currentFilters}
-                collapsed={collapsed}
-                isMobile={false}
-              />
-            </div>
-            <Button
-              variant="ghost"
+            <FilterModal 
+              onFiltersChange={onFiltersChange}
+              currentFilters={currentFilters}
+              collapsed={collapsed}
+              isMobile={false}
+            />
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                // Handle sign out logic here
+                console.log('Sign out clicked')
+                router.push('/signin')
+              }}
               className={cn(
-                "w-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl",
-                collapsed ? "justify-center p-1 mx-auto w-fit" : "justify-start p-3"
+                "w-full flex items-center rounded-2xl text-left h-14",
+                collapsed ? "justify-center p-1 mx-auto w-fit" : "p-4",
+                "text-red-600 hover:bg-red-50 hover:text-red-700"
               )}
             >
-            </Button>
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
+                "bg-red-100 text-red-600"
+              )}>
+                <LogOut className="w-5 h-5" />
+              </div>
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ 
+                  opacity: collapsed ? 0 : 1, 
+                  width: collapsed ? 0 : "auto",
+                  marginLeft: collapsed ? 0 : 16
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
+                className="overflow-hidden flex-1"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-base truncate">Sign Out</div>
+                  <div className="text-sm opacity-70 truncate">Log out of account</div>
+                </div>
+              </motion.div>
+            </motion.button>
           </div>
         </motion.div>
       </div>
@@ -259,8 +311,10 @@ const BottomNavigation = ({ activeTab, onTabChange, onFiltersChange, currentFilt
   )
 }
 
-export default function DatingLayout({ children }) {
+// Main layout content component
+const DatingLayoutContent = ({ children }) => {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [isMobile, setIsMobile] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
   const [activeTab, setActiveTab] = useState("discover")
@@ -272,6 +326,9 @@ export default function DatingLayout({ children }) {
     onlineOnly: false,
     verifiedOnly: false,
   })
+
+  // Check if we're in a chat view (has match parameter)
+  const isInChat = searchParams?.get("match")
 
   // Check if mobile
   useEffect(() => {
@@ -323,14 +380,25 @@ export default function DatingLayout({ children }) {
         {children}
       </div>
       
-      <Suspense fallback={null}>
-        <BottomNavigation 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab} 
-          onFiltersChange={handleFiltersChange}
-          currentFilters={currentFilters}
-        />
-      </Suspense>
+      {/* Only show bottom navigation if not in a chat */}
+      {!isInChat && (
+        <Suspense fallback={null}>
+          <BottomNavigation 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab} 
+            onFiltersChange={handleFiltersChange}
+            currentFilters={currentFilters}
+          />
+        </Suspense>
+      )}
     </div>
+  )
+}
+
+export default function DatingLayout({ children }) {
+  return (
+    <Suspense fallback={null}>
+      <DatingLayoutContent children={children} />
+    </Suspense>
   )
 }

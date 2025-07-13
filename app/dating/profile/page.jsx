@@ -30,6 +30,7 @@ import {
   Headphones,
   GraduationCap,
   ArrowLeft,
+  LogOut,
 } from "lucide-react"
 import Image from "next/image"
 import { motion } from "motion/react"
@@ -327,6 +328,24 @@ export default function ProfilePage() {
                   <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 </motion.button>
               ))}
+              
+              {/* Sign Out Button */}
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => {
+                  // Handle sign out logic here
+                  console.log('Sign out clicked from profile')
+                  window.location.href = '/signin'
+                }}
+                className="flex items-center justify-between w-full p-3 sm:p-4 md:p-5 hover:bg-red-50 rounded-xl sm:rounded-2xl transition-all duration-200 border-t border-gray-100 mt-4"
+              >
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+                  <span className="text-red-600 font-medium text-sm sm:text-base">Sign Out</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-red-400 flex-shrink-0" />
+              </motion.button>
             </div>
           </Card>
         </div>

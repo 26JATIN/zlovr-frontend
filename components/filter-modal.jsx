@@ -118,39 +118,63 @@ export function FilterModal({ onFiltersChange, currentFilters = {}, collapsed = 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={cn(
-            "relative",
-            collapsed ? "p-2" : isMobile ? "flex flex-col items-center space-y-2 p-3 rounded-2xl transition-all duration-200 text-gray-500 hover:text-gray-700" : "p-3"
-          )}
-        >
-          <Filter className={cn(
-            collapsed ? "w-5 h-5" : isMobile ? "w-6 h-6" : "w-4 h-4 mr-2"
-          )} />
-          {!collapsed && (
-            <>
-              {isMobile ? (
-                <span className="text-xs font-semibold tracking-tight">Filters</span>
-              ) : (
-                <>
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </>
-              )}
-            </>
-          )}
-          {(collapsed || isMobile) && activeFiltersCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-              {activeFiltersCount}
-            </span>
-          )}
-        </motion.button>
+        {isMobile ? (
+          // Mobile bottom navigation style
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center space-y-1 sm:space-y-2 p-2 sm:p-3 rounded-2xl transition-all duration-200 text-gray-500 hover:text-gray-700 relative"
+          >
+            <Filter className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-xs font-semibold tracking-tight">Filters</span>
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                {activeFiltersCount}
+              </span>
+            )}
+          </motion.button>
+        ) : (
+          // Desktop sidebar style
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={cn(
+              "w-full flex items-center rounded-2xl text-left relative",
+              collapsed ? "justify-center p-1 mx-auto w-fit" : "p-4",
+              "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <div className={cn(
+              "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
+              "bg-gray-100 text-gray-600"
+            )}>
+              <Filter className="w-5 h-5" />
+            </div>
+            <motion.div
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ 
+                opacity: collapsed ? 0 : 1, 
+                width: collapsed ? 0 : "auto",
+                marginLeft: collapsed ? 0 : 16
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.4 }}
+              className="overflow-hidden flex-1"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-base truncate">Filters</div>
+                <div className="text-sm opacity-70 truncate">Customize search</div>
+              </div>
+            </motion.div>
+            {activeFiltersCount > 0 && (
+              <span className={cn(
+                "bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold",
+                collapsed ? "absolute -top-1 -right-1 w-4 h-4" : "ml-2 w-5 h-5"
+              )}>
+                {activeFiltersCount}
+              </span>
+            )}
+          </motion.button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
