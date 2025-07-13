@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -317,7 +317,8 @@ const Chat = ({ match, onBack }) => {
   )
 }
 
-export default function MessagesPage() {
+// Component that uses useSearchParams
+const MessagesPageContent = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const matchId = searchParams.get("match")
@@ -354,5 +355,25 @@ export default function MessagesPage() {
         <Button onClick={() => router.push("/dating/matches")}>Go to Matches</Button>
       </div>
     </div>
+  )
+}
+
+// Loading component for Suspense fallback
+const MessagesPageLoading = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-700 mx-auto"></div>
+        <p className="text-gray-600">Loading messages...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<MessagesPageLoading />}>
+      <MessagesPageContent />
+    </Suspense>
   )
 }
