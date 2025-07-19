@@ -39,6 +39,8 @@ import {
   Save,
   Upload,
   X,
+  Star,
+  CreditCard,
 } from "lucide-react"
 import Image from "next/image"
 import { motion } from "motion/react"
@@ -193,6 +195,7 @@ const ProfileSettings = ({ onBack }) => {
     { id: "dating", label: "Dating", icon: Heart },
     { id: "profile", label: "Profile", icon: Edit },
     { id: "photos", label: "Photos", icon: Camera },
+    { id: "plans", label: "Plans", icon: CreditCard },
   ]
 
   return (
@@ -699,6 +702,52 @@ const ProfileSettings = ({ onBack }) => {
                         )}
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Plans Section */}
+              {activeSection === "plans" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900 mb-2">Choose Your Plan</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Example plans */}
+                    <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl shadow p-6 flex flex-col items-center text-center">
+                      <Star className="w-8 h-8 text-yellow-400 mb-2" />
+                      <h4 className="font-bold text-lg mb-1">Free</h4>
+                      <p className="text-gray-500 mb-4 text-sm">Basic features to get you started</p>
+                      <ul className="text-gray-700 text-sm mb-6 space-y-1">
+                        <li>✔️ Swipe & Match</li>
+                        <li>✔️ 1 Super Like per week</li>
+                        <li>✔️ Basic Filters</li>
+                      </ul>
+                      <Button className="w-full rounded-xl" disabled>Current Plan</Button>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+                      <Star className="w-8 h-8 text-blue-500 mb-2" />
+                      <h4 className="font-bold text-lg mb-1">Plus</h4>
+                      <p className="text-gray-500 mb-4 text-sm">Unlock more features and visibility</p>
+                      <ul className="text-gray-700 text-sm mb-6 space-y-1">
+                        <li>✔️ Unlimited Likes</li>
+                        <li>✔️ 5 Super Likes per week</li>
+                        <li>✔️ Advanced Filters</li>
+                        <li>✔️ See Who Liked You</li>
+                      </ul>
+                      <Button className="w-full rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold">Upgrade</Button>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-50 to-white border border-yellow-200 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+                      <Star className="w-8 h-8 text-yellow-500 mb-2" />
+                      <h4 className="font-bold text-lg mb-1">Premium</h4>
+                      <p className="text-gray-500 mb-4 text-sm">All features, top priority, and more</p>
+                      <ul className="text-gray-700 text-sm mb-6 space-y-1">
+                        <li>✔️ Unlimited Likes</li>
+                        <li>✔️ 10 Super Likes per week</li>
+                        <li>✔️ See Who Liked You</li>
+                        <li>✔️ Boost Profile</li>
+                        <li>✔️ Priority Support</li>
+                      </ul>
+                      <Button className="w-full rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white font-semibold">Go Premium</Button>
+                    </div>
                   </div>
                 </div>
               )}

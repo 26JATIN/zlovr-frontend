@@ -32,6 +32,7 @@ import {
   GraduationCap,
   X,
   ChevronDown,
+  Star,
 } from "lucide-react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
@@ -205,7 +206,7 @@ const interestIcons = {
 }
 
 // Enhanced Match Modal Component
-const MatchModal = ({ matchedUser, onClose, onMessage }) => {
+const MatchModal = ({ matchedUser, onClose, onMessage, isSuperLike }) => {
   return (
     <AnimatePresence>
       <motion.div
@@ -257,14 +258,18 @@ const MatchModal = ({ matchedUser, onClose, onMessage }) => {
                 </motion.div>
               </div>
 
-              {/* Enhanced Animated Heart */}
+              {/* Enhanced Animated Heart or Star for Super Like */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.5, type: "spring", stiffness: 300, damping: 15 }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-pink-500 to-red-500 rounded-3xl flex items-center justify-center shadow-xl border-4 border-white"
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${isSuperLike ? "bg-gradient-to-br from-blue-500 to-cyan-400" : "bg-gradient-to-br from-pink-500 to-red-500"} rounded-3xl flex items-center justify-center shadow-xl border-4 border-white`}
               >
-                <Heart className="w-8 h-8 text-white fill-current" />
+                {isSuperLike ? (
+                  <Star className="w-8 h-8 text-white fill-current" />
+                ) : (
+                  <Heart className="w-8 h-8 text-white fill-current" />
+                )}
               </motion.div>
 
               {/* Enhanced Sparkle Effects */}
@@ -293,8 +298,14 @@ const MatchModal = ({ matchedUser, onClose, onMessage }) => {
               transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
               className="space-y-4"
             >
-              <h2 className="text-4xl font-bold text-gray-900 tracking-tight">It's a Match! 🎉</h2>
-              <p className="text-gray-600 text-lg font-medium">You and {matchedUser.name} liked each other</p>
+              <h2 className="text-4xl font-bold text-gray-900 tracking-tight">
+                {isSuperLike ? "Super Like! 🌟" : "It's a Match! 🎉"}
+              </h2>
+              <p className="text-gray-600 text-lg font-medium">
+                {isSuperLike
+                  ? `You sent a Super Like to ${matchedUser.name} and it's an instant match!`
+                  : `You and ${matchedUser.name} liked each other`}
+              </p>
             </motion.div>
 
             {/* Enhanced Action Buttons */}
@@ -327,7 +338,7 @@ const MatchModal = ({ matchedUser, onClose, onMessage }) => {
 }
 
 // Desktop Profile Layout Component (unchanged)
-const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
+const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isMobile, superLikeUsed }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showLikeModal, setShowLikeModal] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -515,11 +526,27 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowLikeModal(true)}
+                onClick={() => {
+                  if (isMobile) {
+                    setShowLikeModal(true)
+                  } else {
+                    handleLike()
+                  }
+                }}
                 className="flex-1 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Heart className="w-6 h-6 mr-3 fill-current" />
                 <span className="font-semibold">Like {user.name}</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onSuperLike()}
+                disabled={superLikeUsed}
+                className={`flex-1 h-16 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 font-bold border-2 border-blue-200 ${superLikeUsed ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <Star className="w-6 h-6 mr-3 fill-current" />
+                <span className="font-semibold">Super Like</span>
               </motion.button>
             </div>
           </div>
@@ -642,53 +669,55 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
         )}
       </AnimatePresence>
 
-      {/* Like Modal */}
-      <AnimatePresence>
-        {showLikeModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
-            onClick={() => setShowLikeModal(false)}
-          >
+      {/* Like Modal (only for mobile) */}
+      {isMobile && (
+        <AnimatePresence>
+          {showLikeModal && (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="bg-white rounded-3xl p-10 max-w-lg w-full text-center shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+              onClick={() => setShowLikeModal(false)}
             >
-              <div className="space-y-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-red-500 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                  <Heart className="w-12 h-12 text-white fill-current" />
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: 50 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="bg-white rounded-3xl p-10 max-w-lg w-full text-center shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="space-y-8">
+                  <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-red-500 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
+                    <Heart className="w-12 h-12 text-white fill-current" />
+                  </div>
+                  <div>
+                    <h3 className="text-3xl font-bold text-gray-900 mb-3">Like {user.name}?</h3>
+                    <p className="text-gray-600 text-lg">Show her that you're interested and start a conversation!</p>
+                  </div>
+                  <div className="space-y-4">
+                    <Button
+                      onClick={handleLike}
+                      className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-2xl py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Heart className="w-5 h-5 mr-3 fill-current" />
+                      Send Like
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowLikeModal(false)}
+                      className="w-full border-2 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-2xl py-3 font-semibold text-lg"
+                    >
+                      Maybe Later
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-3">Like {user.name}?</h3>
-                  <p className="text-gray-600 text-lg">Show her that you're interested and start a conversation!</p>
-                </div>
-                <div className="space-y-4">
-                  <Button
-                    onClick={handleLike}
-                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-2xl py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    <Heart className="w-5 h-5 mr-3 fill-current" />
-                    Send Like
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowLikeModal(false)}
-                    className="w-full border-2 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-2xl py-3 font-semibold text-lg"
-                  >
-                    Maybe Later
-                  </Button>
-                </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   )
 }
@@ -696,7 +725,7 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
 const MAX_SWIPE_X = 60; // Maximum px translation for swipe
 const MAX_ROTATE = 3; // Maximum degrees rotation
 
-const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
+const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superLikeUsed }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showProfile, setShowProfile] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -704,6 +733,7 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
   const [swipeDirection, setSwipeDirection] = useState(null)
   const [profileImageIndex, setProfileImageIndex] = useState(0)
   const [isProfileImageDragging, setIsProfileImageDragging] = useState(false)
+  const [showSuperLikeModal, setShowSuperLikeModal] = useState(false)
 
   // --- SWIPE LOGIC ---
   const nextImage = () => {
@@ -769,6 +799,25 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
   const prevProfileImage = () => {
     setProfileImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
   }
+
+  // Handle browser back button to close profile modal
+  useEffect(() => {
+    if (!showProfile) return
+    // Push a new state to history when profile modal opens
+    window.history.pushState({ profileModal: true }, "");
+    const handlePopState = (e) => {
+      setShowProfile(false)
+    }
+    window.addEventListener("popstate", handlePopState)
+    return () => {
+      window.removeEventListener("popstate", handlePopState)
+      // If modal is closing, go back in history if we pushed a state
+      if (window.history.state && window.history.state.profileModal) {
+        window.history.back()
+      }
+    }
+  }, [showProfile])
+
   return (
     <>
       <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-10 overflow-hidden">
@@ -897,6 +946,18 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                 </div>
               </div>
             </motion.div>
+            {/* Floating Super Like button - only on card view, not in profile modal */}
+            {!showProfile && (
+              <button
+                className={`fixed bottom-28 right-6 z-30 w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-xl flex items-center justify-center border-4 border-white transition-all duration-200 ${superLikeUsed ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
+                onClick={() => !superLikeUsed && setShowSuperLikeModal(true)}
+                disabled={superLikeUsed}
+                aria-label="Super Like"
+                style={{ boxShadow: '0 8px 32px 0 rgba(0, 120, 255, 0.18)' }}
+              >
+                <Star className="w-8 h-8 text-white fill-current" />
+              </button>
+            )}
           </div>
         </div>
         {/* Enhanced Swipe Instructions */}
@@ -908,6 +969,52 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
         >
         </motion.div>
       </div>
+      {/* Super Like Confirmation Modal */}
+      <AnimatePresence>
+        {showSuperLikeModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => setShowSuperLikeModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="bg-white rounded-3xl p-8 max-w-xs w-full text-center shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-3xl flex items-center justify-center mx-auto shadow-xl mb-4">
+                <Star className="w-10 h-10 text-white fill-current" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Send Super Like?</h3>
+              <p className="text-gray-600 mb-6">Super Like instantly matches you with this person. You have 1 Super Like per session.</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSuperLikeModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowSuperLikeModal(false)
+                    onSuperLike()
+                  }}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold"
+                  disabled={superLikeUsed}
+                >
+                  Super Like
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* --- PROFILE MODAL GALLERY IMPROVEMENTS --- */}
       <AnimatePresence>
         {showProfile && (
@@ -1159,6 +1266,8 @@ export default function DiscoverPage() {
   const [matchedUser, setMatchedUser] = useState(null)
   const [showMatchModal, setShowMatchModal] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [superLikeUsed, setSuperLikeUsed] = useState(false)
+  const [superLikeMatch, setSuperLikeMatch] = useState(false)
 
   const currentUser = users[currentUserIndex]
 
@@ -1189,9 +1298,21 @@ export default function DiscoverPage() {
     setCurrentUserIndex((prev) => prev + 1)
   }
 
+  const handleSuperLike = () => {
+    if (superLikeUsed) return
+    setSuperLikeUsed(true)
+    setMatchedUser(currentUser)
+    setSuperLikeMatch(true)
+    setTimeout(() => setShowMatchModal(true), 300)
+    setTimeout(() => {
+      setCurrentUserIndex((prev) => prev + 1)
+    }, 1200)
+  }
+
   const closeMatchModal = () => {
     setShowMatchModal(false)
     setMatchedUser(null)
+    setSuperLikeMatch(false)
   }
 
   const handleMessage = () => {
@@ -1251,14 +1372,14 @@ export default function DiscoverPage() {
   return (
     <>
       {isMobile ? (
-        <MobileSwipeLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
+        <MobileSwipeLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} onSuperLike={handleSuperLike} superLikeUsed={superLikeUsed} />
       ) : (
-        <DesktopProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
+        <DesktopProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} onSuperLike={handleSuperLike} isMobile={isMobile} superLikeUsed={superLikeUsed} />
       )}
 
       {/* Match Modal */}
       {showMatchModal && matchedUser && (
-        <MatchModal matchedUser={matchedUser} onClose={closeMatchModal} onMessage={handleMessage} />
+        <MatchModal matchedUser={matchedUser} onClose={closeMatchModal} onMessage={handleMessage} isSuperLike={superLikeMatch} />
       )}
     </>
   )
