@@ -4,7 +4,23 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { LayoutDashboard, Users, Flag, BarChart3, Settings, Shield, HeadphonesIcon, DollarSign, FileText, Menu, X, LogOut, Bell, Search, Sparkles } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Users,
+  Flag,
+  BarChart3,
+  Settings,
+  Shield,
+  HeadphonesIcon,
+  DollarSign,
+  FileText,
+  Menu,
+  X,
+  LogOut,
+  Bell,
+  Search,
+  Sparkles,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -464,7 +480,7 @@ export default function AdminLayout({ children }) {
     } else {
       document.body.style.overflow = "unset"
     }
-    
+
     return () => {
       document.body.style.overflow = "unset"
     }

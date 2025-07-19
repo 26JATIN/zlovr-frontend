@@ -2,167 +2,120 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 import {
   BarChart3,
   TrendingUp,
   TrendingDown,
   Users,
   Heart,
-  MessageCircle,
   DollarSign,
-  Globe,
   Smartphone,
   Monitor,
+  Globe,
   Clock,
-  MapPin,
+  Target,
 } from "lucide-react"
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState("7d")
-  const [metric, setMetric] = useState("users")
+  const [timeRange, setTimeRange] = useState("30d")
 
   const overviewStats = [
     {
-      title: "Total Users",
-      value: "12,847",
+      title: "Total Revenue",
+      value: "$127,450",
       change: "+12.5%",
       trend: "up",
-      icon: Users,
-      description: "Registered users",
+      icon: DollarSign,
+      description: "Monthly recurring revenue",
     },
     {
-      title: "Daily Active Users",
+      title: "Active Users",
       value: "8,923",
       change: "+8.2%",
       trend: "up",
-      icon: Clock,
-      description: "Users active today",
+      icon: Users,
+      description: "Daily active users",
     },
     {
-      title: "Total Matches",
-      value: "45,672",
-      change: "+15.3%",
+      title: "Match Success Rate",
+      value: "73.4%",
+      change: "+5.1%",
       trend: "up",
       icon: Heart,
       description: "Successful matches",
     },
     {
-      title: "Messages Sent",
-      value: "234,891",
-      change: "+22.1%",
-      trend: "up",
-      icon: MessageCircle,
-      description: "Messages exchanged",
+      title: "Avg. Session Time",
+      value: "24m 32s",
+      change: "-2.3%",
+      trend: "down",
+      icon: Clock,
+      description: "Average session duration",
     },
   ]
 
-  const demographics = [
-    { age: "18-24", male: 1234, female: 1456, percentage: 21 },
-    { age: "25-29", male: 2345, female: 2678, percentage: 39 },
-    { age: "30-34", male: 1876, female: 1654, percentage: 27 },
-    { age: "35-39", male: 987, female: 876, percentage: 14 },
-    { age: "40+", male: 543, female: 432, percentage: 8 },
+  const userDemographics = [
+    { ageGroup: "18-24", percentage: 28, count: 3584, color: "bg-blue-500" },
+    { ageGroup: "25-34", percentage: 42, count: 5387, color: "bg-purple-500" },
+    { ageGroup: "35-44", percentage: 20, count: 2569, color: "bg-pink-500" },
+    { ageGroup: "45-54", percentage: 8, count: 1026, color: "bg-orange-500" },
+    { ageGroup: "55+", percentage: 2, count: 257, color: "bg-gray-500" },
+  ]
+
+  const genderDistribution = [
+    { gender: "Female", percentage: 52, count: 6680, color: "bg-pink-500" },
+    { gender: "Male", percentage: 46, count: 5909, color: "bg-blue-500" },
+    { gender: "Non-binary", percentage: 2, count: 257, color: "bg-purple-500" },
   ]
 
   const deviceStats = [
-    { device: "Mobile", users: 9876, percentage: 76.8 },
-    { device: "Desktop", users: 2341, percentage: 18.2 },
-    { device: "Tablet", users: 630, percentage: 4.9 },
+    { device: "Mobile", percentage: 78, count: 10019, icon: Smartphone },
+    { device: "Desktop", percentage: 20, count: 2569, icon: Monitor },
+    { device: "Tablet", percentage: 2, count: 257, icon: Globe },
   ]
 
-  const locationStats = [
-    { city: "New York", users: 2847, matches: 1234, growth: "+12%" },
-    { city: "Los Angeles", users: 2156, matches: 987, growth: "+8%" },
-    { city: "Chicago", users: 1834, matches: 756, growth: "+15%" },
-    { city: "Houston", users: 1567, matches: 623, growth: "+5%" },
-    { city: "Phoenix", users: 1234, matches: 534, growth: "+18%" },
-    { city: "Philadelphia", users: 1098, matches: 445, growth: "+7%" },
+  const topLocations = [
+    { city: "New York", users: 2847, matches: 1423, revenue: "$12,450" },
+    { city: "Los Angeles", users: 2156, matches: 1078, revenue: "$9,230" },
+    { city: "Chicago", users: 1923, matches: 962, revenue: "$8,150" },
+    { city: "Houston", users: 1654, matches: 827, revenue: "$7,890" },
+    { city: "Phoenix", users: 1432, matches: 716, revenue: "$6,540" },
   ]
 
   const engagementMetrics = [
-    {
-      metric: "Average Session Duration",
-      value: "12m 34s",
-      change: "+2.3%",
-      trend: "up",
-    },
-    {
-      metric: "Messages per Match",
-      value: "8.7",
-      change: "+5.1%",
-      trend: "up",
-    },
-    {
-      metric: "Profile Completion Rate",
-      value: "78.4%",
-      change: "-1.2%",
-      trend: "down",
-    },
-    {
-      metric: "Photo Upload Rate",
-      value: "92.1%",
-      change: "+3.4%",
-      trend: "up",
-    },
+    { metric: "Daily Messages", value: "28,394", change: "+15.3%", trend: "up" },
+    { metric: "Profile Views", value: "156,789", change: "+8.7%", trend: "up" },
+    { metric: "Likes Given", value: "89,234", change: "+12.1%", trend: "up" },
+    { metric: "Super Likes", value: "4,567", change: "+23.4%", trend: "up" },
+    { metric: "Profile Completions", value: "2,345", change: "-3.2%", trend: "down" },
+    { metric: "Photo Uploads", value: "12,678", change: "+18.9%", trend: "up" },
   ]
 
-  const revenueMetrics = [
-    {
-      title: "Monthly Revenue",
-      value: "$24,680",
-      change: "+18.5%",
-      trend: "up",
-      description: "Premium subscriptions",
-    },
-    {
-      title: "Premium Users",
-      value: "1,456",
-      change: "+12.3%",
-      trend: "up",
-      description: "11.3% of total users",
-    },
-    {
-      title: "Conversion Rate",
-      value: "3.2%",
-      change: "+0.8%",
-      trend: "up",
-      description: "Free to premium",
-    },
-    {
-      title: "ARPU",
-      value: "$16.95",
-      change: "+5.2%",
-      trend: "up",
-      description: "Average revenue per user",
-    },
+  const revenueBreakdown = [
+    { source: "Premium Subscriptions", amount: "$89,450", percentage: 70.2 },
+    { source: "Super Likes", amount: "$23,120", percentage: 18.1 },
+    { source: "Boosts", amount: "$14,880", percentage: 11.7 },
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
           <p className="text-gray-600 mt-1">Comprehensive insights into app performance and user behavior</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="24h">24 Hours</SelectItem>
-              <SelectItem value="7d">7 Days</SelectItem>
-              <SelectItem value="30d">30 Days</SelectItem>
-              <SelectItem value="90d">90 Days</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Export Report
+          <Button variant={timeRange === "7d" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("7d")}>
+            7 Days
+          </Button>
+          <Button variant={timeRange === "30d" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("30d")}>
+            30 Days
+          </Button>
+          <Button variant={timeRange === "90d" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("90d")}>
+            90 Days
           </Button>
         </div>
       </div>
@@ -172,14 +125,14 @@ export default function AnalyticsPage() {
         {overviewStats.map((stat) => {
           const IconComponent = stat.icon
           return (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow">
+            <Card key={stat.title} className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600">{stat.title}</CardTitle>
-                <IconComponent className="h-5 w-5 text-gray-400" />
+                <IconComponent className="h-5 w-5 text-gray-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                <div className="flex items-center space-x-1 mt-1">
+                <div className="flex items-center space-x-2 mt-2">
                   {stat.trend === "up" ? (
                     <TrendingUp className="h-4 w-4 text-green-500" />
                   ) : (
@@ -188,6 +141,7 @@ export default function AnalyticsPage() {
                   <span className={`text-sm font-medium ${stat.trend === "up" ? "text-green-600" : "text-red-600"}`}>
                     {stat.change}
                   </span>
+                  <span className="text-sm text-gray-500">vs last period</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
               </CardContent>
@@ -196,49 +150,44 @@ export default function AnalyticsPage() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Demographics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* User Demographics */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Users className="h-5 w-5" />
               <span>User Demographics</span>
             </CardTitle>
-            <CardDescription>Age and gender distribution</CardDescription>
+            <CardDescription>Age distribution of active users</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {demographics.map((demo) => (
-                <div key={demo.age} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900">{demo.age} years</span>
-                    <span className="text-sm text-gray-600">{demo.percentage}%</span>
+              {userDemographics.map((demo) => (
+                <div key={demo.ageGroup} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{
+                        backgroundColor:
+                          demo.color.replace("bg-", "").replace("-500", "") === "blue"
+                            ? "#3b82f6"
+                            : demo.color.replace("bg-", "").replace("-500", "") === "purple"
+                              ? "#8b5cf6"
+                              : demo.color.replace("bg-", "").replace("-500", "") === "pink"
+                                ? "#ec4899"
+                                : demo.color.replace("bg-", "").replace("-500", "") === "orange"
+                                  ? "#f97316"
+                                  : "#6b7280",
+                      }}
+                    ></div>
+                    <span className="text-sm font-medium text-gray-900">{demo.ageGroup}</span>
                   </div>
-                  <div className="flex space-x-2">
-                    <div className="flex-1">
-                      <div className="flex justify-between text-xs text-gray-600 mb-1">
-                        <span>Male</span>
-                        <span>{demo.male.toLocaleString()}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-500 h-2 rounded-full"
-                          style={{ width: `${(demo.male / (demo.male + demo.female)) * 100}%` }}
-                        ></div>
-                      </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div className={`h-2 rounded-full ${demo.color}`} style={{ width: `${demo.percentage}%` }}></div>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between text-xs text-gray-600 mb-1">
-                        <span>Female</span>
-                        <span>{demo.female.toLocaleString()}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-pink-500 h-2 rounded-full"
-                          style={{ width: `${(demo.female / (demo.male + demo.female)) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
+                    <span className="text-sm text-gray-600 w-12 text-right">{demo.percentage}%</span>
+                    <span className="text-sm text-gray-500 w-16 text-right">{demo.count.toLocaleString()}</span>
                   </div>
                 </div>
               ))}
@@ -246,7 +195,52 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* Device Usage */}
+        {/* Gender Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Target className="h-5 w-5" />
+              <span>Gender Distribution</span>
+            </CardTitle>
+            <CardDescription>Gender breakdown of user base</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {genderDistribution.map((gender) => (
+                <div key={gender.gender} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{
+                        backgroundColor:
+                          gender.color.replace("bg-", "").replace("-500", "") === "pink"
+                            ? "#ec4899"
+                            : gender.color.replace("bg-", "").replace("-500", "") === "blue"
+                              ? "#3b82f6"
+                              : "#8b5cf6",
+                      }}
+                    ></div>
+                    <span className="text-sm font-medium text-gray-900">{gender.gender}</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${gender.color}`}
+                        style={{ width: `${gender.percentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm text-gray-600 w-12 text-right">{gender.percentage}%</span>
+                    <span className="text-sm text-gray-500 w-16 text-right">{gender.count.toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Device Usage & Engagement */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -257,126 +251,45 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {deviceStats.map((device) => (
-                <div
-                  key={device.device}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
-                >
-                  <div className="flex items-center space-x-3">
-                    {device.device === "Mobile" && <Smartphone className="h-5 w-5 text-blue-500" />}
-                    {device.device === "Desktop" && <Monitor className="h-5 w-5 text-green-500" />}
-                    {device.device === "Tablet" && <Globe className="h-5 w-5 text-purple-500" />}
-                    <div>
-                      <p className="font-medium text-gray-900">{device.device}</p>
-                      <p className="text-sm text-gray-600">{device.users.toLocaleString()} users</p>
+              {deviceStats.map((device) => {
+                const IconComponent = device.icon
+                return (
+                  <div key={device.device} className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-lg bg-gray-100">
+                        <IconComponent className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">{device.device}</span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div className="h-2 rounded-full bg-blue-500" style={{ width: `${device.percentage}%` }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600 w-12 text-right">{device.percentage}%</span>
+                      <span className="text-sm text-gray-500 w-16 text-right">{device.count.toLocaleString()}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900">{device.percentage}%</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Location Analytics */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <MapPin className="h-5 w-5" />
-            <span>Geographic Distribution</span>
-          </CardTitle>
-          <CardDescription>User distribution by city</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {locationStats.map((location) => (
-              <div
-                key={location.city}
-                className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900">{location.city}</h4>
-                  <Badge variant="outline" className="text-green-600 border-green-200">
-                    {location.growth}
-                  </Badge>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Users:</span>
-                    <span className="font-medium">{location.users.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Matches:</span>
-                    <span className="font-medium">{location.matches.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Match Rate:</span>
-                    <span className="font-medium">{((location.matches / location.users) * 100).toFixed(1)}%</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Engagement Metrics */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Clock className="h-5 w-5" />
+              <BarChart3 className="h-5 w-5" />
               <span>Engagement Metrics</span>
             </CardTitle>
-            <CardDescription>User interaction and engagement data</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {engagementMetrics.map((metric) => (
-                <div key={metric.metric} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                  <div>
-                    <p className="font-medium text-gray-900">{metric.metric}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-1">
-                      {metric.trend === "up" ? (
-                        <TrendingUp className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-red-500" />
-                      )}
-                      <span
-                        className={`text-sm font-medium ${metric.trend === "up" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {metric.change}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Revenue Analytics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <DollarSign className="h-5 w-5" />
-              <span>Revenue Analytics</span>
-            </CardTitle>
-            <CardDescription>Monetization and subscription metrics</CardDescription>
+            <CardDescription>User activity and engagement levels</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              {revenueMetrics.map((metric) => (
-                <div key={metric.title} className="p-3 rounded-lg border border-gray-200">
-                  <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                  <p className="text-xl font-bold text-gray-900 mt-1">{metric.value}</p>
-                  <div className="flex items-center space-x-1 mt-1">
+              {engagementMetrics.map((metric) => (
+                <div key={metric.metric} className="text-center p-3 rounded-lg border">
+                  <div className="text-lg font-bold text-gray-900">{metric.value}</div>
+                  <div className="text-sm text-gray-600 mb-2">{metric.metric}</div>
+                  <div className="flex items-center justify-center space-x-1">
                     {metric.trend === "up" ? (
                       <TrendingUp className="h-3 w-3 text-green-500" />
                     ) : (
@@ -388,7 +301,68 @@ export default function AnalyticsPage() {
                       {metric.change}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{metric.description}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Revenue & Locations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <DollarSign className="h-5 w-5" />
+              <span>Revenue Breakdown</span>
+            </CardTitle>
+            <CardDescription>Revenue sources and distribution</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {revenueBreakdown.map((source) => (
+                <div key={source.source} className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-gray-900">{source.source}</div>
+                    <div className="text-sm text-gray-500">{source.percentage}% of total</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-gray-900">{source.amount}</div>
+                    <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                      <div className="h-2 rounded-full bg-green-500" style={{ width: `${source.percentage}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Globe className="h-5 w-5" />
+              <span>Top Locations</span>
+            </CardTitle>
+            <CardDescription>Cities with highest user activity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topLocations.map((location, index) => (
+                <div key={location.city} className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="flex items-center space-x-3">
+                    <Badge variant="outline" className="w-8 h-8 rounded-full p-0 flex items-center justify-center">
+                      {index + 1}
+                    </Badge>
+                    <div>
+                      <div className="font-medium text-gray-900">{location.city}</div>
+                      <div className="text-sm text-gray-500">{location.users.toLocaleString()} users</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-gray-900">{location.revenue}</div>
+                    <div className="text-xs text-gray-500">{location.matches} matches</div>
+                  </div>
                 </div>
               ))}
             </div>
