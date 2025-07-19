@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -117,32 +117,6 @@ export function FilterModal({ onFiltersChange, currentFilters = {}, collapsed = 
       }
     }
   }, [isOpen, isMobile])
-
-  // Swipe down to close modal if at top
-  const [touchStartY, setTouchStartY] = useState(null)
-  const [touchDeltaY, setTouchDeltaY] = useState(0)
-  const modalContentRef = useRef(null)
-
-  const handleTouchStart = (e) => {
-    if (!isMobile || !isOpen) return
-    if (modalContentRef.current && modalContentRef.current.scrollTop === 0) {
-      setTouchStartY(e.touches[0].clientY)
-    } else {
-      setTouchStartY(null)
-    }
-  }
-  const handleTouchMove = (e) => {
-    if (touchStartY !== null) {
-      setTouchDeltaY(e.touches[0].clientY - touchStartY)
-    }
-  }
-  const handleTouchEnd = () => {
-    if (touchStartY !== null && touchDeltaY > 60) {
-      setIsOpen(false)
-    }
-    setTouchStartY(null)
-    setTouchDeltaY(0)
-  }
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -305,10 +279,6 @@ export function FilterModal({ onFiltersChange, currentFilters = {}, collapsed = 
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl p-0 overflow-y-auto max-h-[90vh] relative"
                 onClick={e => e.stopPropagation()}
-                ref={modalContentRef}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
               >
                 {/* Sticky drag handle and header */}
                 <div className="sticky top-0 z-10 bg-white rounded-t-3xl pt-3 pb-2 flex flex-col items-center border-b border-gray-100 shadow-sm">
