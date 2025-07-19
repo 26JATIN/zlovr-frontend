@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -97,6 +97,51 @@ export function FilterModal({ onFiltersChange, currentFilters = {}, collapsed = 
     if (!open) {
       setFilters(lastAppliedFilters)
     }
+  }
+
+  // Handle browser back button to close modal on mobile
+  useEffect(() => {
+    if (!isMobile) return
+    if (!isOpen) return
+    // Push a new state to history when modal opens
+    window.history.pushState({ filterModal: true }, "");
+    const handlePopState = (e) => {
+      setIsOpen(false)
+    }
+    window.addEventListener("popstate", handlePopState)
+    return () => {
+      window.removeEventListener("popstate", handlePopState)
+      // If modal is closing, go back in history if we pushed a state
+      if (window.history.state && window.history.state.filterModal) {
+        window.history.back()
+      }
+    }
+  }, [isOpen, isMobile])
+
+  // Swipe down to close modal if at top
+  const [touchStartY, setTouchStartY] = useState(null)
+  const [touchDeltaY, setTouchDeltaY] = useState(0)
+  const modalContentRef = useRef(null)
+
+  const handleTouchStart = (e) => {
+    if (!isMobile || !isOpen) return
+    if (modalContentRef.current && modalContentRef.current.scrollTop === 0) {
+      setTouchStartY(e.touches[0].clientY)
+    } else {
+      setTouchStartY(null)
+    }
+  }
+  const handleTouchMove = (e) => {
+    if (touchStartY !== null) {
+      setTouchDeltaY(e.touches[0].clientY - touchStartY)
+    }
+  }
+  const handleTouchEnd = () => {
+    if (touchStartY !== null && touchDeltaY > 60) {
+      setIsOpen(false)
+    }
+    setTouchStartY(null)
+    setTouchDeltaY(0)
   }
 
   const toggleSection = (section) => {
@@ -260,19 +305,451 @@ export function FilterModal({ onFiltersChange, currentFilters = {}, collapsed = 
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl p-0 overflow-y-auto max-h-[90vh] relative"
                 onClick={e => e.stopPropagation()}
+                ref={modalContentRef}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
                 {/* Sticky drag handle and header */}
                 <div className="sticky top-0 z-10 bg-white rounded-t-3xl pt-3 pb-2 flex flex-col items-center border-b border-gray-100 shadow-sm">
                   <div className="w-12 h-1.5 bg-gray-300 rounded-full mb-2" />
-                  <DialogHeader>
+        <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-800">
-                      <Filter className="w-5 h-5" />
-                      Advanced Filters
-                    </DialogTitle>
-                  </DialogHeader>
+            <Filter className="w-5 h-5" />
+            Advanced Filters
+          </DialogTitle>
+        </DialogHeader>
                 </div>
                 <div className="px-4 pb-2 pt-1 space-y-6 bg-slate-50 rounded-b-3xl">
                   {/* Modernized filter sections */}
+                  <div className="space-y-5">
+          {/* Basic Filters */}
+                    <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
+          <FilterSection 
+            title="Basic Preferences" 
+            isExpanded={expandedSections.basic}
+            onToggle={() => toggleSection('basic')}
+          >
+              {/* Age Range */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Age Range</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="number"
+                    min="18"
+                    max="100"
+                    value={filters.ageRange[0]}
+                    onChange={(e) => handleFilterChange('ageRange', [parseInt(e.target.value), filters.ageRange[1]])}
+                    className="w-20"
+                  />
+                  <span className="text-gray-500">to</span>
+                  <Input
+                    type="number"
+                    min="18"
+                    max="100"
+                    value={filters.ageRange[1]}
+                    onChange={(e) => handleFilterChange('ageRange', [filters.ageRange[0], parseInt(e.target.value)])}
+                    className="w-20"
+                  />
+                </div>
+              </div>
+
+              {/* Distance */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Distance</Label>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gray-500" />
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.distance}
+                    onChange={(e) => handleFilterChange('distance', parseInt(e.target.value))}
+                    className="w-20"
+                  />
+                  <span className="text-gray-500">miles</span>
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Gender</Label>
+                <Select value={filters.gender} onValueChange={(value) => handleFilterChange('gender', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All genders</SelectItem>
+                    <SelectItem value="man">Men</SelectItem>
+                    <SelectItem value="woman">Women</SelectItem>
+                    <SelectItem value="non-binary">Non-binary</SelectItem>
+                    <SelectItem value="transgender">Transgender</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Sexual Orientation */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Sexual Orientation</Label>
+                <Select value={filters.sexualOrientation} onValueChange={(value) => handleFilterChange('sexualOrientation', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All orientations</SelectItem>
+                    <SelectItem value="straight">Straight</SelectItem>
+                    <SelectItem value="gay">Gay</SelectItem>
+                    <SelectItem value="lesbian">Lesbian</SelectItem>
+                    <SelectItem value="bisexual">Bisexual</SelectItem>
+                    <SelectItem value="pansexual">Pansexual</SelectItem>
+                    <SelectItem value="asexual">Asexual</SelectItem>
+                    <SelectItem value="demisexual">Demisexual</SelectItem>
+                    <SelectItem value="queer">Queer</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+          </FilterSection>
+                    </div>
+          {/* Physical Attributes */}
+                    <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
+          <FilterSection 
+            title="Physical Attributes" 
+            isExpanded={expandedSections.physical}
+            onToggle={() => toggleSection('physical')}
+          >
+              {/* Height Range */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Height Range</Label>
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <Input
+                      type="number"
+                      min="48"
+                      max="96"
+                      value={filters.heightRange[0]}
+                      onChange={(e) => handleFilterChange('heightRange', [parseInt(e.target.value), filters.heightRange[1]])}
+                      className="w-20"
+                    />
+                    <span className="text-xs text-gray-500 mt-1">{formatHeight(filters.heightRange[0])}</span>
+                  </div>
+                  <span className="text-gray-500">to</span>
+                  <div className="flex flex-col">
+                    <Input
+                      type="number"
+                      min="48"
+                      max="96"
+                      value={filters.heightRange[1]}
+                      onChange={(e) => handleFilterChange('heightRange', [filters.heightRange[0], parseInt(e.target.value)])}
+                      className="w-20"
+                    />
+                    <span className="text-xs text-gray-500 mt-1">{formatHeight(filters.heightRange[1])}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body Type */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Body Type</Label>
+                <Select value={filters.bodyType} onValueChange={(value) => handleFilterChange('bodyType', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All body types</SelectItem>
+                    <SelectItem value="slim">Slim</SelectItem>
+                    <SelectItem value="athletic">Athletic</SelectItem>
+                    <SelectItem value="average">Average</SelectItem>
+                    <SelectItem value="curvy">Curvy</SelectItem>
+                    <SelectItem value="plus-size">Plus size</SelectItem>
+                    <SelectItem value="muscular">Muscular</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Ethnicity */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Ethnicity</Label>
+                <Select value={filters.ethnicity} onValueChange={(value) => handleFilterChange('ethnicity', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All ethnicities</SelectItem>
+                    <SelectItem value="asian">Asian</SelectItem>
+                    <SelectItem value="black">Black/African American</SelectItem>
+                    <SelectItem value="hispanic">Hispanic/Latino</SelectItem>
+                    <SelectItem value="white">White/Caucasian</SelectItem>
+                    <SelectItem value="middle-eastern">Middle Eastern</SelectItem>
+                    <SelectItem value="native-american">Native American</SelectItem>
+                    <SelectItem value="pacific-islander">Pacific Islander</SelectItem>
+                    <SelectItem value="mixed">Mixed/Multiracial</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+          </FilterSection>
+                    </div>
+          {/* Lifestyle */}
+                    <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
+          <FilterSection 
+            title="Lifestyle" 
+            isExpanded={expandedSections.lifestyle}
+            onToggle={() => toggleSection('lifestyle')}
+          >
+              {/* Education */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Education</Label>
+                <Select value={filters.education} onValueChange={(value) => handleFilterChange('education', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All education levels</SelectItem>
+                    <SelectItem value="high-school">High School</SelectItem>
+                    <SelectItem value="some-college">Some College</SelectItem>
+                    <SelectItem value="associates">Associate's Degree</SelectItem>
+                    <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                    <SelectItem value="masters">Master's Degree</SelectItem>
+                    <SelectItem value="phd">PhD/Doctorate</SelectItem>
+                    <SelectItem value="trade-school">Trade School</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Religion */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Religion</Label>
+                <Select value={filters.religion} onValueChange={(value) => handleFilterChange('religion', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All religions</SelectItem>
+                    <SelectItem value="christian">Christian</SelectItem>
+                    <SelectItem value="catholic">Catholic</SelectItem>
+                    <SelectItem value="jewish">Jewish</SelectItem>
+                    <SelectItem value="muslim">Muslim</SelectItem>
+                    <SelectItem value="hindu">Hindu</SelectItem>
+                    <SelectItem value="buddhist">Buddhist</SelectItem>
+                    <SelectItem value="sikh">Sikh</SelectItem>
+                    <SelectItem value="spiritual">Spiritual</SelectItem>
+                    <SelectItem value="agnostic">Agnostic</SelectItem>
+                    <SelectItem value="atheist">Atheist</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Smoking */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Smoking</Label>
+                <Select value={filters.smoking} onValueChange={(value) => handleFilterChange('smoking', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any smoking preference</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                    <SelectItem value="socially">Socially</SelectItem>
+                    <SelectItem value="regularly">Regularly</SelectItem>
+                    <SelectItem value="trying-to-quit">Trying to quit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Drinking */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Drinking</Label>
+                <Select value={filters.drinking} onValueChange={(value) => handleFilterChange('drinking', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any drinking preference</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                    <SelectItem value="socially">Socially</SelectItem>
+                    <SelectItem value="regularly">Regularly</SelectItem>
+                    <SelectItem value="occasionally">Occasionally</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Exercise */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Exercise</Label>
+                <Select value={filters.exercise} onValueChange={(value) => handleFilterChange('exercise', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any exercise level</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                    <SelectItem value="rarely">Rarely</SelectItem>
+                    <SelectItem value="sometimes">Sometimes</SelectItem>
+                    <SelectItem value="often">Often</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+          </FilterSection>
+                    </div>
+          {/* Dating Preferences */}
+                    <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
+          <FilterSection 
+            title="Dating Preferences" 
+            isExpanded={expandedSections.preferences}
+            onToggle={() => toggleSection('preferences')}
+          >
+              {/* Relationship Goals */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Relationship Goals</Label>
+                <Select value={filters.relationshipGoals} onValueChange={(value) => handleFilterChange('relationshipGoals', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All relationship types</SelectItem>
+                    <SelectItem value="long-term">Long-term relationship</SelectItem>
+                    <SelectItem value="marriage">Marriage</SelectItem>
+                    <SelectItem value="casual">Casual dating</SelectItem>
+                    <SelectItem value="friendship">Friendship</SelectItem>
+                    <SelectItem value="hookups">Hookups</SelectItem>
+                    <SelectItem value="figuring-out">Still figuring it out</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Has Children */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Has Children</Label>
+                <Select value={filters.hasChildren} onValueChange={(value) => handleFilterChange('hasChildren', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any</SelectItem>
+                    <SelectItem value="yes">Has children</SelectItem>
+                    <SelectItem value="no">No children</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Wants Children */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Wants Children</Label>
+                <Select value={filters.wantsChildren} onValueChange={(value) => handleFilterChange('wantsChildren', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any</SelectItem>
+                    <SelectItem value="yes">Wants children</SelectItem>
+                    <SelectItem value="no">Doesn't want children</SelectItem>
+                    <SelectItem value="maybe">Maybe/Open to it</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+                      </FilterSection>
+                    </div>
+                    {/* Interests */}
+                    <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
+                      <FilterSection 
+                        title="Interests" 
+                        isExpanded={expandedSections.interests}
+                        onToggle={() => toggleSection('interests')}
+                      >
+                        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-2">
+                          {Object.entries(interestIcons).map(([interest, IconComponent]) => {
+                            const isSelected = filters.interests.includes(interest)
+                            return (
+                              <motion.button
+                                key={interest}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleInterestToggle(interest)}
+                                className={cn(
+                                  "flex items-center gap-2 p-2 rounded-lg border text-sm transition-all duration-200",
+                                  isSelected
+                                    ? "border-slate-400 bg-slate-50 text-slate-700"
+                                    : "border-gray-200 hover:border-gray-300"
+                                )}
+                              >
+                                <IconComponent className="w-4 h-4 flex-shrink-0" />
+                                <span className="truncate">{interest}</span>
+                              </motion.button>
+                            )
+                          })}
+            </div>
+          </FilterSection>
+                    </div>
+                  </div>
+                  {/* Additional Options */}
+                  <div className="space-y-3 pt-2 border-t border-gray-200 mt-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="onlineOnly"
+                        checked={filters.onlineOnly}
+                        onCheckedChange={(checked) => handleFilterChange('onlineOnly', checked)}
+                      />
+                      <Label htmlFor="onlineOnly" className="text-sm">
+                        Online now only
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="verifiedOnly"
+                        checked={filters.verifiedOnly}
+                        onCheckedChange={(checked) => handleFilterChange('verifiedOnly', checked)}
+                      />
+                      <Label htmlFor="verifiedOnly" className="text-sm">
+                        Verified profiles only
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+                {/* Sticky footer for actions */}
+                <DialogFooter className="sticky bottom-0 z-10 bg-white rounded-b-3xl flex gap-2 pt-4 border-t border-gray-200 px-4 pb-4 shadow-lg">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setFilters(lastAppliedFilters); setIsOpen(false); }}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleApplyFilters}
+                    className="flex-1 bg-slate-700 hover:bg-slate-800 text-white font-semibold"
+                  >
+                    Apply Filters ({activeFiltersCount})
+                  </Button>
+                </DialogFooter>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              style={{ padding: '2rem' }}
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                className="w-full max-w-lg min-w-[320px] bg-white rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] p-0"
+                style={{ boxSizing: 'border-box' }}
+                onClick={e => e.stopPropagation()}
+              >
+                <DialogHeader className="sticky top-0 z-10 bg-white rounded-t-2xl pt-6 pb-2 px-6 border-b border-gray-100 shadow-sm">
+                  <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-800">
+                    <Filter className="w-5 h-5" />
+                    Advanced Filters
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="px-6 pb-2 pt-1 space-y-6 bg-slate-50 rounded-b-2xl" style={{ minWidth: 0 }}>
                   <div className="space-y-5">
                     {/* Basic Filters */}
                     <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
@@ -601,494 +1078,81 @@ export function FilterModal({ onFiltersChange, currentFilters = {}, collapsed = 
                         </div>
                       </FilterSection>
                     </div>
-                    {/* Interests */}
+          {/* Interests */}
                     <div className="rounded-2xl bg-white/90 shadow border border-gray-100 p-4 mb-2">
-                      <FilterSection 
-                        title="Interests" 
-                        isExpanded={expandedSections.interests}
-                        onToggle={() => toggleSection('interests')}
-                      >
-                        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-2">
-                          {Object.entries(interestIcons).map(([interest, IconComponent]) => {
-                            const isSelected = filters.interests.includes(interest)
-                            return (
-                              <motion.button
-                                key={interest}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => handleInterestToggle(interest)}
-                                className={cn(
-                                  "flex items-center gap-2 p-2 rounded-lg border text-sm transition-all duration-200",
-                                  isSelected
-                                    ? "border-slate-400 bg-slate-50 text-slate-700"
-                                    : "border-gray-200 hover:border-gray-300"
-                                )}
-                              >
-                                <IconComponent className="w-4 h-4 flex-shrink-0" />
-                                <span className="truncate">{interest}</span>
-                              </motion.button>
-                            )
-                          })}
-                        </div>
-                      </FilterSection>
+          <FilterSection 
+            title="Interests" 
+            isExpanded={expandedSections.interests}
+            onToggle={() => toggleSection('interests')}
+          >
+            <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-2">
+              {Object.entries(interestIcons).map(([interest, IconComponent]) => {
+                const isSelected = filters.interests.includes(interest)
+                return (
+                  <motion.button
+                    key={interest}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleInterestToggle(interest)}
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-lg border text-sm transition-all duration-200",
+                      isSelected
+                        ? "border-slate-400 bg-slate-50 text-slate-700"
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <IconComponent className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{interest}</span>
+                  </motion.button>
+                )
+              })}
+            </div>
+          </FilterSection>
                     </div>
                   </div>
-                  {/* Additional Options */}
-                  <div className="space-y-3 pt-2 border-t border-gray-200 mt-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="onlineOnly"
-                        checked={filters.onlineOnly}
-                        onCheckedChange={(checked) => handleFilterChange('onlineOnly', checked)}
-                      />
-                      <Label htmlFor="onlineOnly" className="text-sm">
-                        Online now only
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="verifiedOnly"
-                        checked={filters.verifiedOnly}
-                        onCheckedChange={(checked) => handleFilterChange('verifiedOnly', checked)}
-                      />
-                      <Label htmlFor="verifiedOnly" className="text-sm">
-                        Verified profiles only
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-                {/* Sticky footer for actions */}
-                <DialogFooter className="sticky bottom-0 z-10 bg-white rounded-b-3xl flex gap-2 pt-4 border-t border-gray-200 px-4 pb-4 shadow-lg">
-                  <Button
-                    variant="outline"
-                    onClick={() => { setFilters(lastAppliedFilters); setIsOpen(false); }}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleApplyFilters}
-                    className="flex-1 bg-slate-700 hover:bg-slate-800 text-white font-semibold"
-                  >
-                    Apply Filters ({activeFiltersCount})
-                  </Button>
-                </DialogFooter>
-              </motion.div>
+          {/* Additional Options */}
+          <div className="space-y-3 pt-2 border-t border-gray-200">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="onlineOnly"
+                checked={filters.onlineOnly}
+                onCheckedChange={(checked) => handleFilterChange('onlineOnly', checked)}
+              />
+              <Label htmlFor="onlineOnly" className="text-sm">
+                Online now only
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="verifiedOnly"
+                checked={filters.verifiedOnly}
+                onCheckedChange={(checked) => handleFilterChange('verifiedOnly', checked)}
+              />
+              <Label htmlFor="verifiedOnly" className="text-sm">
+                Verified profiles only
+              </Label>
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="flex gap-2 pt-4 border-t border-gray-200">
+          <Button
+            variant="outline"
+            onClick={handleResetFilters}
+            className="flex-1"
+          >
+            Reset All
+          </Button>
+          <Button
+            onClick={handleApplyFilters}
+            className="flex-1 bg-slate-700 hover:bg-slate-800"
+          >
+            Apply Filters ({activeFiltersCount})
+          </Button>
+        </DialogFooter>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      ) : (
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Filter className="w-5 h-5" />
-              Advanced Filters
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Basic Filters */}
-            <FilterSection 
-              title="Basic Preferences" 
-              isExpanded={expandedSections.basic}
-              onToggle={() => toggleSection('basic')}
-            >
-              <div className="space-y-4">
-                {/* Age Range */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Age Range</Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      type="number"
-                      min="18"
-                      max="100"
-                      value={filters.ageRange[0]}
-                      onChange={(e) => handleFilterChange('ageRange', [parseInt(e.target.value), filters.ageRange[1]])}
-                      className="w-20"
-                    />
-                    <span className="text-gray-500">to</span>
-                    <Input
-                      type="number"
-                      min="18"
-                      max="100"
-                      value={filters.ageRange[1]}
-                      onChange={(e) => handleFilterChange('ageRange', [filters.ageRange[0], parseInt(e.target.value)])}
-                      className="w-20"
-                    />
-                  </div>
-                </div>
-
-                {/* Distance */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Distance</Label>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <Input
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={filters.distance}
-                      onChange={(e) => handleFilterChange('distance', parseInt(e.target.value))}
-                      className="w-20"
-                    />
-                    <span className="text-gray-500">miles</span>
-                  </div>
-                </div>
-
-                {/* Gender */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Gender</Label>
-                  <Select value={filters.gender} onValueChange={(value) => handleFilterChange('gender', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All genders</SelectItem>
-                      <SelectItem value="man">Men</SelectItem>
-                      <SelectItem value="woman">Women</SelectItem>
-                      <SelectItem value="non-binary">Non-binary</SelectItem>
-                      <SelectItem value="transgender">Transgender</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Sexual Orientation */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Sexual Orientation</Label>
-                  <Select value={filters.sexualOrientation} onValueChange={(value) => handleFilterChange('sexualOrientation', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All orientations</SelectItem>
-                      <SelectItem value="straight">Straight</SelectItem>
-                      <SelectItem value="gay">Gay</SelectItem>
-                      <SelectItem value="lesbian">Lesbian</SelectItem>
-                      <SelectItem value="bisexual">Bisexual</SelectItem>
-                      <SelectItem value="pansexual">Pansexual</SelectItem>
-                      <SelectItem value="asexual">Asexual</SelectItem>
-                      <SelectItem value="demisexual">Demisexual</SelectItem>
-                      <SelectItem value="queer">Queer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </FilterSection>
-
-            {/* Physical Attributes */}
-            <FilterSection 
-              title="Physical Attributes" 
-              isExpanded={expandedSections.physical}
-              onToggle={() => toggleSection('physical')}
-            >
-              <div className="space-y-4">
-                {/* Height Range */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Height Range</Label>
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col">
-                      <Input
-                        type="number"
-                        min="48"
-                        max="96"
-                        value={filters.heightRange[0]}
-                        onChange={(e) => handleFilterChange('heightRange', [parseInt(e.target.value), filters.heightRange[1]])}
-                        className="w-20"
-                      />
-                      <span className="text-xs text-gray-500 mt-1">{formatHeight(filters.heightRange[0])}</span>
-                    </div>
-                    <span className="text-gray-500">to</span>
-                    <div className="flex flex-col">
-                      <Input
-                        type="number"
-                        min="48"
-                        max="96"
-                        value={filters.heightRange[1]}
-                        onChange={(e) => handleFilterChange('heightRange', [filters.heightRange[0], parseInt(e.target.value)])}
-                        className="w-20"
-                      />
-                      <span className="text-xs text-gray-500 mt-1">{formatHeight(filters.heightRange[1])}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Body Type */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Body Type</Label>
-                  <Select value={filters.bodyType} onValueChange={(value) => handleFilterChange('bodyType', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All body types</SelectItem>
-                      <SelectItem value="slim">Slim</SelectItem>
-                      <SelectItem value="athletic">Athletic</SelectItem>
-                      <SelectItem value="average">Average</SelectItem>
-                      <SelectItem value="curvy">Curvy</SelectItem>
-                      <SelectItem value="plus-size">Plus size</SelectItem>
-                      <SelectItem value="muscular">Muscular</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Ethnicity */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Ethnicity</Label>
-                  <Select value={filters.ethnicity} onValueChange={(value) => handleFilterChange('ethnicity', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All ethnicities</SelectItem>
-                      <SelectItem value="asian">Asian</SelectItem>
-                      <SelectItem value="black">Black/African American</SelectItem>
-                      <SelectItem value="hispanic">Hispanic/Latino</SelectItem>
-                      <SelectItem value="white">White/Caucasian</SelectItem>
-                      <SelectItem value="middle-eastern">Middle Eastern</SelectItem>
-                      <SelectItem value="native-american">Native American</SelectItem>
-                      <SelectItem value="pacific-islander">Pacific Islander</SelectItem>
-                      <SelectItem value="mixed">Mixed/Multiracial</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </FilterSection>
-
-            {/* Lifestyle */}
-            <FilterSection 
-              title="Lifestyle" 
-              isExpanded={expandedSections.lifestyle}
-              onToggle={() => toggleSection('lifestyle')}
-            >
-              <div className="space-y-4">
-                {/* Education */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Education</Label>
-                  <Select value={filters.education} onValueChange={(value) => handleFilterChange('education', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All education levels</SelectItem>
-                      <SelectItem value="high-school">High School</SelectItem>
-                      <SelectItem value="some-college">Some College</SelectItem>
-                      <SelectItem value="associates">Associate's Degree</SelectItem>
-                      <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                      <SelectItem value="masters">Master's Degree</SelectItem>
-                      <SelectItem value="phd">PhD/Doctorate</SelectItem>
-                      <SelectItem value="trade-school">Trade School</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Religion */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Religion</Label>
-                  <Select value={filters.religion} onValueChange={(value) => handleFilterChange('religion', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All religions</SelectItem>
-                      <SelectItem value="christian">Christian</SelectItem>
-                      <SelectItem value="catholic">Catholic</SelectItem>
-                      <SelectItem value="jewish">Jewish</SelectItem>
-                      <SelectItem value="muslim">Muslim</SelectItem>
-                      <SelectItem value="hindu">Hindu</SelectItem>
-                      <SelectItem value="buddhist">Buddhist</SelectItem>
-                      <SelectItem value="sikh">Sikh</SelectItem>
-                      <SelectItem value="spiritual">Spiritual</SelectItem>
-                      <SelectItem value="agnostic">Agnostic</SelectItem>
-                      <SelectItem value="atheist">Atheist</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Smoking */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Smoking</Label>
-                  <Select value={filters.smoking} onValueChange={(value) => handleFilterChange('smoking', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Any smoking preference</SelectItem>
-                      <SelectItem value="never">Never</SelectItem>
-                      <SelectItem value="socially">Socially</SelectItem>
-                      <SelectItem value="regularly">Regularly</SelectItem>
-                      <SelectItem value="trying-to-quit">Trying to quit</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Drinking */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Drinking</Label>
-                  <Select value={filters.drinking} onValueChange={(value) => handleFilterChange('drinking', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Any drinking preference</SelectItem>
-                      <SelectItem value="never">Never</SelectItem>
-                      <SelectItem value="socially">Socially</SelectItem>
-                      <SelectItem value="regularly">Regularly</SelectItem>
-                      <SelectItem value="occasionally">Occasionally</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Exercise */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Exercise</Label>
-                  <Select value={filters.exercise} onValueChange={(value) => handleFilterChange('exercise', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Any exercise level</SelectItem>
-                      <SelectItem value="never">Never</SelectItem>
-                      <SelectItem value="rarely">Rarely</SelectItem>
-                      <SelectItem value="sometimes">Sometimes</SelectItem>
-                      <SelectItem value="often">Often</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </FilterSection>
-
-            {/* Dating Preferences */}
-            <FilterSection 
-              title="Dating Preferences" 
-              isExpanded={expandedSections.preferences}
-              onToggle={() => toggleSection('preferences')}
-            >
-              <div className="space-y-4">
-                {/* Relationship Goals */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Relationship Goals</Label>
-                  <Select value={filters.relationshipGoals} onValueChange={(value) => handleFilterChange('relationshipGoals', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All relationship types</SelectItem>
-                      <SelectItem value="long-term">Long-term relationship</SelectItem>
-                      <SelectItem value="marriage">Marriage</SelectItem>
-                      <SelectItem value="casual">Casual dating</SelectItem>
-                      <SelectItem value="friendship">Friendship</SelectItem>
-                      <SelectItem value="hookups">Hookups</SelectItem>
-                      <SelectItem value="figuring-out">Still figuring it out</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Has Children */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Has Children</Label>
-                  <Select value={filters.hasChildren} onValueChange={(value) => handleFilterChange('hasChildren', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Any</SelectItem>
-                      <SelectItem value="yes">Has children</SelectItem>
-                      <SelectItem value="no">No children</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Wants Children */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Wants Children</Label>
-                  <Select value={filters.wantsChildren} onValueChange={(value) => handleFilterChange('wantsChildren', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Any</SelectItem>
-                      <SelectItem value="yes">Wants children</SelectItem>
-                      <SelectItem value="no">Doesn't want children</SelectItem>
-                      <SelectItem value="maybe">Maybe/Open to it</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </FilterSection>
-
-            {/* Interests */}
-            <FilterSection 
-              title="Interests" 
-              isExpanded={expandedSections.interests}
-              onToggle={() => toggleSection('interests')}
-            >
-              <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-2">
-                {Object.entries(interestIcons).map(([interest, IconComponent]) => {
-                  const isSelected = filters.interests.includes(interest)
-                  return (
-                    <motion.button
-                      key={interest}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleInterestToggle(interest)}
-                      className={cn(
-                        "flex items-center gap-2 p-2 rounded-lg border text-sm transition-all duration-200",
-                        isSelected
-                          ? "border-slate-400 bg-slate-50 text-slate-700"
-                          : "border-gray-200 hover:border-gray-300"
-                      )}
-                    >
-                      <IconComponent className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{interest}</span>
-                    </motion.button>
-                  )
-                })}
-              </div>
-            </FilterSection>
-
-            {/* Additional Options */}
-            <div className="space-y-3 pt-2 border-t border-gray-200">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="onlineOnly"
-                  checked={filters.onlineOnly}
-                  onCheckedChange={(checked) => handleFilterChange('onlineOnly', checked)}
-                />
-                <Label htmlFor="onlineOnly" className="text-sm">
-                  Online now only
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="verifiedOnly"
-                  checked={filters.verifiedOnly}
-                  onCheckedChange={(checked) => handleFilterChange('verifiedOnly', checked)}
-                />
-                <Label htmlFor="verifiedOnly" className="text-sm">
-                  Verified profiles only
-                </Label>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex gap-2 pt-4 border-t border-gray-200">
-            <Button
-              variant="outline"
-              onClick={handleResetFilters}
-              className="flex-1"
-            >
-              Reset All
-            </Button>
-            <Button
-              onClick={handleApplyFilters}
-              className="flex-1 bg-slate-700 hover:bg-slate-800"
-            >
-              Apply Filters ({activeFiltersCount})
-            </Button>
-          </DialogFooter>
-        </DialogContent>
       )}
     </Dialog>
   )
