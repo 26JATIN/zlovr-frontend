@@ -2,9 +2,37 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Heart, MapPin, Shield, Sparkles, Zap, ChevronLeft, ChevronRight, RefreshCw, Quote, ArrowLeft, Users, Music, Book, Dumbbell, Plane, Coffee, Dog, Gamepad2, Palette, Code, Mountain, Utensils, CameraIcon, Film, Headphones, Briefcase, GraduationCap } from 'lucide-react'
+import {
+  Heart,
+  MapPin,
+  Shield,
+  Sparkles,
+  Zap,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Quote,
+  ArrowLeft,
+  Users,
+  Music,
+  Book,
+  Dumbbell,
+  Plane,
+  Coffee,
+  Dog,
+  Gamepad2,
+  Palette,
+  Code,
+  Mountain,
+  Utensils,
+  CameraIcon,
+  Film,
+  Headphones,
+  Briefcase,
+  GraduationCap,
+  X,
+  ChevronDown,
+} from "lucide-react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
 import { cn } from "@/lib/utils"
@@ -298,7 +326,7 @@ const MatchModal = ({ matchedUser, onClose, onMessage }) => {
   )
 }
 
-// Desktop Profile Layout Component
+// Desktop Profile Layout Component (unchanged)
 const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showLikeModal, setShowLikeModal] = useState(false)
@@ -317,8 +345,8 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
         top: rect.top,
         left: rect.left,
         width: rect.width,
-        height: rect.height
-      }
+        height: rect.height,
+      },
     })
     setExpandedPhotoIndex(index)
     setShowExpandedPhoto(true)
@@ -509,36 +537,44 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
             onClick={closeExpandedPhoto}
           >
             <motion.div
-              initial={clickedPhotoRef ? {
-                x: clickedPhotoRef.rect.left - (window.innerWidth / 2) + (clickedPhotoRef.rect.width / 2),
-                y: clickedPhotoRef.rect.top - (window.innerHeight / 2) + (clickedPhotoRef.rect.height / 2),
-                width: clickedPhotoRef.rect.width,
-                height: clickedPhotoRef.rect.height,
-                scale: 1
-              } : { scale: 0.8, opacity: 0, y: 50 }}
+              initial={
+                clickedPhotoRef
+                  ? {
+                      x: clickedPhotoRef.rect.left - window.innerWidth / 2 + clickedPhotoRef.rect.width / 2,
+                      y: clickedPhotoRef.rect.top - window.innerHeight / 2 + clickedPhotoRef.rect.height / 2,
+                      width: clickedPhotoRef.rect.width,
+                      height: clickedPhotoRef.rect.height,
+                      scale: 1,
+                    }
+                  : { scale: 0.8, opacity: 0, y: 50 }
+              }
               animate={{
                 x: 0,
                 y: 0,
                 width: "100%",
                 height: "100%",
-                scale: 1
+                scale: 1,
               }}
-              exit={clickedPhotoRef ? {
-                x: clickedPhotoRef.rect.left - (window.innerWidth / 2) + (clickedPhotoRef.rect.width / 2),
-                y: clickedPhotoRef.rect.top - (window.innerHeight / 2) + (clickedPhotoRef.rect.height / 2),
-                width: clickedPhotoRef.rect.width,
-                height: clickedPhotoRef.rect.height,
-                scale: 1
-              } : { scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
+              exit={
+                clickedPhotoRef
+                  ? {
+                      x: clickedPhotoRef.rect.left - window.innerWidth / 2 + clickedPhotoRef.rect.width / 2,
+                      y: clickedPhotoRef.rect.top - window.innerHeight / 2 + clickedPhotoRef.rect.height / 2,
+                      width: clickedPhotoRef.rect.width,
+                      height: clickedPhotoRef.rect.height,
+                      scale: 1,
+                    }
+                  : { scale: 0.8, opacity: 0, y: 50 }
+              }
+              transition={{
+                type: "spring",
+                stiffness: 300,
                 damping: 25,
-                duration: 0.6
+                duration: 0.6,
               }}
               className="relative max-w-4xl w-full h-[80vh] overflow-hidden shadow-2xl"
               style={{
-                borderRadius: clickedPhotoRef ? "16px" : "24px"
+                borderRadius: clickedPhotoRef ? "16px" : "24px",
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -557,7 +593,7 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
                   className="object-cover"
                   sizes="100vw"
                 />
-                
+
                 {/* Photo Info Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
                   <h3 className="text-white font-bold text-3xl mb-4">{user.images[expandedPhotoIndex].title}</h3>
@@ -657,226 +693,510 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
   )
 }
 
-// Mobile Profile Layout Component
-const MobileProfileLayout = ({ user, onLike, onRefresh }) => {
+// Mobile Clean Swipe Layout Component
+const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [slideDirection, setSlideDirection] = useState(0) // -1 for left, 1 for right, 0 for initial
+  const [showProfile, setShowProfile] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState(0)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [swipeDirection, setSwipeDirection] = useState(null)
+  const [profileImageIndex, setProfileImageIndex] = useState(0)
+  const [isProfileImageDragging, setIsProfileImageDragging] = useState(false)
 
   const nextImage = () => {
-    setSlideDirection(1)
     setCurrentImageIndex((prev) => (prev + 1) % user.images.length)
   }
 
   const prevImage = () => {
-    setSlideDirection(-1)
     setCurrentImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
   }
 
   const handleDragStart = () => {
     setIsDragging(true)
+    setSwipeDirection(null)
   }
 
   const handleDrag = (event, info) => {
-    setDragOffset(info.offset.x)
+    const { x, y } = info.offset
+    setDragOffset({ x, y })
+
+    // More responsive swipe direction detection
+    if (Math.abs(x) > 20) {
+      setSwipeDirection(x > 0 ? "right" : "left")
+    } else {
+      setSwipeDirection(null)
+    }
   }
 
   const handleDragEnd = (event, info) => {
     setIsDragging(false)
-    setDragOffset(0)
-    
-    // Simple threshold - any significant movement triggers one image change
-    const swipeThreshold = 30
-    
-    if (info.offset.x > swipeThreshold) {
-      // Swipe right - go to previous
-      prevImage()
-    } else if (info.offset.x < -swipeThreshold) {
-      // Swipe left - go to next
-      nextImage()
+    setDragOffset({ x: 0, y: 0 })
+    setSwipeDirection(null)
+
+    const swipeThreshold = 80
+    const velocityThreshold = 400
+    const { x } = info.offset
+    const { x: velocityX } = info.velocity
+
+    // Enhanced swipe detection with lower thresholds for better responsiveness
+    if (Math.abs(x) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
+      if (x > 0 || velocityX > velocityThreshold) {
+        // Swipe right - like
+        onLike()
+      } else if (x < 0 || velocityX < -velocityThreshold) {
+        // Swipe left - pass
+        onRefresh()
+      }
     }
-    // If movement is too small, it stays on current image
   }
 
-  const handleLike = () => {
-    onLike()
+  const handleImageTap = (event) => {
+    if (isDragging) return
+
+    const rect = event.currentTarget.getBoundingClientRect()
+    const tapX = event.clientX - rect.left
+    const cardWidth = rect.width
+
+    if (tapX > cardWidth / 2) {
+      nextImage()
+    } else {
+      prevImage()
+    }
   }
 
-  const currentImage = user.images[currentImageIndex]
+  const handleCardTap = () => {
+    if (!isDragging) {
+      setProfileImageIndex(currentImageIndex)
+      setShowProfile(true)
+    }
+  }
+
+  const nextProfileImage = () => {
+    setProfileImageIndex((prev) => (prev + 1) % user.images.length)
+  }
+
+  const prevProfileImage = () => {
+    setProfileImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
-      <div className="w-full">
-        {/* Image Section */}
-        <div className="relative w-full">
-          <div className="relative w-full h-[65vh] overflow-hidden rounded-none">
-            {/* Simple gallery with single image display */}
-            <motion.div
-              className="relative h-full"
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.1}
-              onDragStart={handleDragStart}
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
-              whileDrag={{ 
-                scale: 0.98,
-                transition: { duration: 0.1 }
-              }}
-              dragTransition={{ 
-                bounceStiffness: 600, 
-                bounceDamping: 20 
-              }}
-            >
-              <Image
-                src={user.images[currentImageIndex].url || "/placeholder.svg"}
-                alt={`${user.name} - ${user.images[currentImageIndex].title}`}
-                fill
-                className="object-cover w-full h-full rounded-none"
-                sizes="100vw"
-                priority={true}
-              />
+    <>
+      <div className="min-h-screen bg-gray-50 flex flex-col relative overflow-hidden">
+        {/* Main Card Container */}
+        <div className="flex-1 flex items-center justify-center p-4 pt-20 pb-32">
+          <motion.div
+            className="relative w-full max-w-sm h-[75vh] bg-white rounded-2xl shadow-2xl overflow-hidden cursor-pointer"
+            drag
+            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            dragMomentum={true}
+            onDragStart={handleDragStart}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+            animate={{
+              x: dragOffset.x,
+              y: dragOffset.y,
+              rotate: dragOffset.x * 0.1,
+              scale: isDragging ? 1.03 : 1,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 25,
+              duration: isDragging ? 0 : 0.4,
+            }}
+            onClick={handleCardTap}
+            whileTap={{ scale: 0.98 }}
+            style={{
+              transformOrigin: "center bottom",
+            }}
+          >
+            {/* Cover Image */}
+            <div className="relative h-full overflow-hidden" onClick={handleImageTap}>
+              <motion.div
+                key={currentImageIndex}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="relative w-full h-full"
+              >
+                <Image
+                  src={user.images[currentImageIndex].url || "/placeholder.svg"}
+                  alt={`${user.name}`}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                  priority={true}
+                />
+              </motion.div>
+
+              {/* Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-              {/* Photo counter */}
-              <div className="absolute top-6 left-6">
-                <div className="px-3 py-2 bg-black/40 backdrop-blur-sm rounded-xl border border-white/30">
-                  <span className="text-white text-sm font-bold">
-                    {currentImageIndex + 1} / {user.images.length}
-                  </span>
+              {/* Image Progress Indicators */}
+              <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
+                {user.images.map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className={cn(
+                      "flex-1 h-1.5 rounded-full transition-all duration-300",
+                      index === currentImageIndex ? "bg-white shadow-lg" : "bg-white/30",
+                    )}
+                    animate={{
+                      scale: index === currentImageIndex ? 1.2 : 1,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Enhanced Swipe Direction Indicators */}
+              <AnimatePresence>
+                {swipeDirection && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.3 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.3 }}
+                    className={cn(
+                      "absolute inset-0 flex items-center justify-center backdrop-blur-[2px]",
+                      swipeDirection === "right" ? "bg-green-400/30" : "bg-red-400/30",
+                    )}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.3, rotate: -180 }}
+                      animate={{ 
+                        scale: [0.3, 1.2, 1], 
+                        rotate: 0,
+                      }}
+                      transition={{ 
+                        scale: { duration: 0.3, ease: "easeOut" },
+                        rotate: { duration: 0.2 }
+                      }}
+                      className={cn(
+                        "w-28 h-28 rounded-full flex items-center justify-center border-4 shadow-2xl",
+                        swipeDirection === "right" 
+                          ? "bg-green-500 border-green-300 shadow-green-500/60" 
+                          : "bg-red-500 border-red-300 shadow-red-500/60",
+                      )}
+                    >
+                      {swipeDirection === "right" ? (
+                        <Heart className="w-14 h-14 text-white fill-current drop-shadow-lg" />
+                      ) : (
+                        <X className="w-14 h-14 text-white drop-shadow-lg" />
+                      )}
+                    </motion.div>
+                    
+                    {/* Enhanced particles effect */}
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ 
+                          opacity: [0, 1, 0],
+                          scale: [0, 1, 0],
+                          x: (Math.random() - 0.5) * 200,
+                          y: (Math.random() - 0.5) * 200,
+                        }}
+                        transition={{ 
+                          duration: 1,
+                          delay: i * 0.1,
+                          ease: "easeOut"
+                        }}
+                        className={cn(
+                          "absolute w-3 h-3 rounded-full",
+                          swipeDirection === "right" ? "bg-green-400" : "bg-red-400"
+                        )}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Basic Info Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-3">
+                    <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+                      {user.name}, {user.age}
+                    </h1>
+                    {user.verified && (
+                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Shield className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  {user.online && <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg animate-pulse"></div>}
+                </div>
+
+                <div className="flex items-center space-x-2 text-white/90 mb-4">
+                  <MapPin className="w-4 h-4" />
+                  <span className="text-sm font-medium">{user.location}</span>
+                </div>
+
+                {/* Tap to view profile hint */}
+                <motion.div 
+                  className="flex items-center justify-center space-x-2 text-white/70 text-sm"
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <span>Tap to view profile</span>
+                  <ChevronDown className="w-4 h-4" />
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Enhanced Swipe Instructions */}
+        <motion.div 
+          className="fixed bottom-40 left-0 right-0 flex justify-center px-8 z-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="bg-black/70 backdrop-blur-md rounded-full px-6 py-3 border border-white/20 shadow-xl">
+            <p className="text-white text-sm font-medium text-center">
+              <span className="text-green-400">❤️ Swipe right</span> • <span className="text-red-400">✗ Swipe left</span>
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Full Screen Gallery-First Profile Modal */}
+      <AnimatePresence>
+        {showProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-50"
+            onClick={() => setShowProfile(false)}
+          >
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-0 bg-white overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="h-full overflow-y-auto">
+                {/* Gallery Section - Full Screen */}
+                <div className="relative h-[60vh]">
+                  {/* Main Image with Swipe Navigation */}
+                  <div className="relative h-full overflow-hidden">
+                    <motion.div
+                      key={profileImageIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      className="relative w-full h-full"
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.3}
+                      onDragStart={() => setIsProfileImageDragging(true)}
+                      onDragEnd={(event, info) => {
+                        setIsProfileImageDragging(false)
+                        const threshold = 75
+                        const velocity = Math.abs(info.velocity.x)
+                        
+                        if (Math.abs(info.offset.x) > threshold || velocity > 300) {
+                          if (info.offset.x > 0 || info.velocity.x > 300) {
+                            prevProfileImage()
+                          } else {
+                            nextProfileImage()
+                          }
+                        }
+                      }}
+                      whileDrag={{ scale: 0.95 }}
+                    >
+                      <Image
+                        src={user.images[profileImageIndex].url || "/placeholder.svg"}
+                        alt={`${user.name} - ${user.images[profileImageIndex].title}`}
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                      />
+                      
+                      {/* Swipe hint overlay */}
+                      {isProfileImageDragging && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center"
+                        >
+                          <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
+                            <span className="text-white text-sm font-medium">← Swipe to navigate →</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+
+                    {/* Close Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowProfile(false)}
+                      className="absolute top-6 right-6 w-12 h-12 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg z-10"
+                    >
+                      <X className="w-6 h-6" />
+                    </motion.button>
+
+                    {/* Image Counter */}
+                    <div className="absolute top-6 left-6 z-10">
+                      <div className="px-4 py-2 bg-black/40 backdrop-blur-sm rounded-full border border-white/30">
+                        <span className="text-white text-sm font-bold">
+                          {profileImageIndex + 1} / {user.images.length}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Enhanced Image Progress Indicators */}
+                    <div className="absolute bottom-6 left-6 right-6 flex space-x-2 z-10">
+                      {user.images.map((_, index) => (
+                        <motion.button
+                          key={index}
+                          onClick={() => setProfileImageIndex(index)}
+                          className={cn(
+                            "flex-1 h-2 rounded-full transition-all duration-300 border border-white/30",
+                            index === profileImageIndex ? "bg-white shadow-lg" : "bg-white/30",
+                          )}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          animate={{
+                            scale: index === profileImageIndex ? 1.1 : 1,
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Image Story Overlay */}
+                    <div className="absolute bottom-20 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                      <motion.div
+                        key={profileImageIndex}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <h3 className="text-white font-bold text-2xl mb-3 drop-shadow-lg">
+                          {user.images[profileImageIndex].title}
+                        </h3>
+                        <p className="text-white/90 text-sm leading-relaxed drop-shadow-sm">
+                          {user.images[profileImageIndex].story}
+                        </p>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Content */}
+                <div className="p-6 space-y-6 bg-white">
+                  {/* Header */}
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
+                        <span className="text-white font-bold text-2xl">{user.name[0]}</span>
+                      </div>
+                      {user.online && (
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-3 border-white rounded-full animate-pulse"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h2 className="text-3xl font-bold text-gray-900">
+                          {user.name}, {user.age}
+                        </h2>
+                        {user.verified && (
+                          <div className="w-8 h-8 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <Shield className="w-5 h-5 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-600 mt-2">
+                        <MapPin className="w-5 h-5" />
+                        <span className="text-base font-medium">{user.location}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-3 text-lg">About</h3>
+                    <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-2xl text-base">{user.bio}</p>
+                  </div>
+
+                  {/* Work & Education */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-2xl">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Briefcase className="w-5 h-5 text-slate-600" />
+                        <span className="font-bold text-gray-900">Work</span>
+                      </div>
+                      <p className="text-gray-700 font-medium">{user.job}</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-2xl">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <GraduationCap className="w-5 h-5 text-slate-600" />
+                        <span className="font-bold text-gray-900">Education</span>
+                      </div>
+                      <p className="text-gray-700 font-medium">{user.education}</p>
+                    </div>
+                  </div>
+
+                  {/* Interests */}
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-4 text-lg">Interests</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {user.interests.map((interest, index) => {
+                        const IconComponent = interestIcons[interest] || Heart
+                        return (
+                          <motion.span
+                            key={index}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="flex items-center space-x-2 px-4 py-3 bg-slate-100 rounded-2xl font-medium text-slate-700 border border-slate-200 shadow-sm"
+                          >
+                            <IconComponent className="w-5 h-5" />
+                            <span>{interest}</span>
+                          </motion.span>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-4 pt-4 pb-8">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setShowProfile(false)
+                        onRefresh()
+                      }}
+                      className="flex-1 h-16 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200"
+                    >
+                      <X className="w-6 h-6 mr-3" />
+                      Pass
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setShowProfile(false)
+                        onLike()
+                      }}
+                      className="flex-1 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Heart className="w-6 h-6 mr-3 fill-current" />
+                      Like
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             </motion.div>
-
-            {/* Image indicators */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-              {user.images.map((_, index) => (
-                <motion.div
-                  key={index}
-                  initial={false}
-                  animate={{
-                    width: index === currentImageIndex ? 32 : 8,
-                    opacity: index === currentImageIndex ? 1 : 0.5,
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="h-1.5 rounded-full bg-white shadow-sm"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Story Section */}
-          <div className="bg-white p-6 shadow-lg border-t border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">{user.images[currentImageIndex].title}</h3>
-            <p className="text-gray-700 leading-relaxed text-base">{user.images[currentImageIndex].story}</p>
-          </div>
-        </div>
-
-        {/* Profile Info Section */}
-        <div className="bg-white p-6 space-y-6 border-t border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">{user.name[0]}</span>
-                </div>
-                {user.online && (
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
-                )}
-              </div>
-              <div>
-                <div className="flex items-center space-x-3">
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {user.name}, {user.age}
-                  </h1>
-                  {user.verified && (
-                    <div className="w-7 h-7 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-                      <Shield className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2 text-gray-600 mt-1">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm font-semibold">{user.location}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center space-x-2 mb-3">
-              <Quote className="w-5 h-5 text-slate-600" />
-              <h3 className="font-bold text-gray-900">About Me</h3>
-            </div>
-            <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">{user.bio}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <div className="flex items-center space-x-2">
-                <Briefcase className="w-4 h-4 text-slate-600" />
-                <span className="font-semibold text-gray-900 text-sm">Work</span>
-              </div>
-              <p className="text-gray-700 text-sm font-medium">{user.job}</p>
-            </div>
-            <div className="space-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <div className="flex items-center space-x-2">
-                <GraduationCap className="w-4 h-4 text-slate-600" />
-                <span className="font-semibold text-gray-900 text-sm">Education</span>
-              </div>
-              <p className="text-gray-700 text-sm font-medium">{user.education}</p>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="font-bold text-gray-900 mb-3">Interests</h3>
-            <div className="flex flex-wrap gap-2">
-              {user.interests.slice(0, 6).map((interest, index) => {
-                const IconComponent = interestIcons[interest] || Heart
-                return (
-                  <span
-                    key={index}
-                    className="flex items-center space-x-2 px-3 py-2 bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 border border-slate-200 shadow-sm"
-                  >
-                    <IconComponent className="w-3 h-3" />
-                    <span>{interest}</span>
-                  </span>
-                )
-              })}
-              {user.interests.length > 6 && (
-                <span className="px-3 py-2 bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 border border-slate-200 shadow-sm">
-                  +{user.interests.length - 6}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Fixed Bottom Buttons */}
-      <div className="fixed bottom-28 left-6 z-40">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onRefresh}
-          className="w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-800 rounded-2xl flex items-center justify-center text-white shadow-xl hover:shadow-2xl transition-all duration-300"
-        >
-          <RefreshCw className="w-7 h-7" />
-        </motion.button>
-      </div>
-      
-      <div className="fixed bottom-28 right-6 z-40">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleLike}
-          className="w-16 h-16 bg-gradient-to-br from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white shadow-xl hover:shadow-2xl transition-all duration-300"
-        >
-          <Heart className="w-7 h-7 fill-current" />
-        </motion.button>
-      </div>
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -978,7 +1298,7 @@ export default function DiscoverPage() {
   return (
     <>
       {isMobile ? (
-        <MobileProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
+        <MobileSwipeLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
       ) : (
         <DesktopProfileLayout user={currentUser} onLike={handleLike} onRefresh={handleRefresh} />
       )}
