@@ -356,6 +356,13 @@ html {
   scroll-behavior: smooth;
 }
 
+html, body, * {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+}
+
 /* Minimalistic gradient animations */
 .gradient-subtle {
   background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #e2e8f0, #cbd5e1);
