@@ -693,7 +693,9 @@ const DesktopProfileLayout = ({ user, onLike, onRefresh }) => {
   )
 }
 
-// Mobile Clean Swipe Layout Component
+const MAX_SWIPE_X = 60; // Maximum px translation for swipe
+const MAX_ROTATE = 3; // Maximum degrees rotation
+
 const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showProfile, setShowProfile] = useState(false)
@@ -703,82 +705,70 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
   const [profileImageIndex, setProfileImageIndex] = useState(0)
   const [isProfileImageDragging, setIsProfileImageDragging] = useState(false)
 
+  // --- SWIPE LOGIC ---
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % user.images.length)
   }
-
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
   }
-
   const handleDragStart = () => {
     setIsDragging(true)
     setSwipeDirection(null)
   }
-
   const handleDrag = (event, info) => {
-    const { x, y } = info.offset
-    setDragOffset({ x, y })
-
-    // More responsive swipe direction detection
-    if (Math.abs(x) > 20) {
+    let { x } = info.offset
+    // Clamp x to max
+    if (x > MAX_SWIPE_X) x = MAX_SWIPE_X
+    if (x < -MAX_SWIPE_X) x = -MAX_SWIPE_X
+    setDragOffset({ x, y: 0 })
+    if (Math.abs(x) > 16) {
       setSwipeDirection(x > 0 ? "right" : "left")
     } else {
       setSwipeDirection(null)
     }
   }
-
   const handleDragEnd = (event, info) => {
     setIsDragging(false)
     setDragOffset({ x: 0, y: 0 })
     setSwipeDirection(null)
-
-    const swipeThreshold = 80
-    const velocityThreshold = 400
+    const swipeThreshold = 40
+    const velocityThreshold = 250
     const { x } = info.offset
     const { x: velocityX } = info.velocity
-
-    // Enhanced swipe detection with lower thresholds for better responsiveness
     if (Math.abs(x) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
       if (x > 0 || velocityX > velocityThreshold) {
-        // Swipe right - like
+        if (navigator.vibrate) navigator.vibrate(30)
         onLike()
       } else if (x < 0 || velocityX < -velocityThreshold) {
-        // Swipe left - pass
+        if (navigator.vibrate) navigator.vibrate(30)
         onRefresh()
       }
     }
   }
-
   const handleImageTap = (event) => {
     if (isDragging) return
-
     const rect = event.currentTarget.getBoundingClientRect()
     const tapX = event.clientX - rect.left
     const cardWidth = rect.width
-
     if (tapX > cardWidth / 2) {
       nextImage()
     } else {
       prevImage()
     }
   }
-
   const handleCardTap = () => {
     if (!isDragging) {
       setProfileImageIndex(currentImageIndex)
       setShowProfile(true)
     }
   }
-
   const nextProfileImage = () => {
     setProfileImageIndex((prev) => (prev + 1) % user.images.length)
   }
-
   const prevProfileImage = () => {
     setProfileImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
   }
-
   return (
     <>
       <div className="min-h-screen bg-gray-50 flex flex-col relative overflow-hidden">
@@ -788,36 +778,34 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
             className="relative w-full max-w-sm h-[75vh] bg-white rounded-2xl shadow-2xl overflow-hidden cursor-pointer"
             drag
             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={0.2}
-            dragMomentum={true}
+            dragElastic={0.04}
+            dragMomentum={false}
             onDragStart={handleDragStart}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
             animate={{
               x: dragOffset.x,
-              y: dragOffset.y,
-              rotate: dragOffset.x * 0.1,
-              scale: isDragging ? 1.03 : 1,
+              y: 0,
+              rotate: (dragOffset.x / MAX_SWIPE_X) * MAX_ROTATE,
+              scale: isDragging ? 1.01 : 1,
             }}
             transition={{
               type: "spring",
-              stiffness: 500,
-              damping: 25,
-              duration: isDragging ? 0 : 0.4,
+              stiffness: 700,
+              damping: 40,
+              duration: isDragging ? 0 : 0.25,
             }}
             onClick={handleCardTap}
             whileTap={{ scale: 0.98 }}
-            style={{
-              transformOrigin: "center bottom",
-            }}
+            style={{ transformOrigin: "center bottom" }}
           >
             {/* Cover Image */}
             <div className="relative h-full overflow-hidden" onClick={handleImageTap}>
               <motion.div
                 key={currentImageIndex}
-                initial={{ opacity: 0, scale: 1.1 }}
+                initial={{ opacity: 0, scale: 1.04 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.25 }}
                 className="relative w-full h-full"
               >
                 <Image
@@ -829,10 +817,8 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                   priority={true}
                 />
               </motion.div>
-
               {/* Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
               {/* Image Progress Indicators */}
               <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
                 {user.images.map((_, index) => (
@@ -843,74 +829,43 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                       index === currentImageIndex ? "bg-white shadow-lg" : "bg-white/30",
                     )}
                     animate={{
-                      scale: index === currentImageIndex ? 1.2 : 1,
+                      scale: index === currentImageIndex ? 1.15 : 1,
                     }}
                   />
                 ))}
               </div>
-
-              {/* Enhanced Swipe Direction Indicators */}
+              {/* Polished Swipe Direction Overlays */}
               <AnimatePresence>
                 {swipeDirection && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.3 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.3 }}
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 0.9, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
                     className={cn(
                       "absolute inset-0 flex items-center justify-center backdrop-blur-[2px]",
-                      swipeDirection === "right" ? "bg-green-400/30" : "bg-red-400/30",
+                      swipeDirection === "right" ? "bg-green-400/20" : "bg-red-400/20",
                     )}
                   >
                     <motion.div
-                      initial={{ scale: 0.3, rotate: -180 }}
-                      animate={{ 
-                        scale: [0.3, 1.2, 1], 
-                        rotate: 0,
-                      }}
-                      transition={{ 
-                        scale: { duration: 0.3, ease: "easeOut" },
-                        rotate: { duration: 0.2 }
-                      }}
+                      initial={{ scale: 0.7, rotate: -180 }}
+                      animate={{ scale: [0.7, 1.1, 1], rotate: 0 }}
+                      transition={{ scale: { duration: 0.22, ease: "easeOut" }, rotate: { duration: 0.18 } }}
                       className={cn(
-                        "w-28 h-28 rounded-full flex items-center justify-center border-4 shadow-2xl",
-                        swipeDirection === "right" 
-                          ? "bg-green-500 border-green-300 shadow-green-500/60" 
-                          : "bg-red-500 border-red-300 shadow-red-500/60",
+                        "w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-2xl",
+                        swipeDirection === "right"
+                          ? "bg-green-500 border-green-300 shadow-green-500/40"
+                          : "bg-red-500 border-red-300 shadow-red-500/40",
                       )}
                     >
                       {swipeDirection === "right" ? (
-                        <Heart className="w-14 h-14 text-white fill-current drop-shadow-lg" />
+                        <Heart className="w-10 h-10 text-white fill-current drop-shadow-lg" />
                       ) : (
-                        <X className="w-14 h-14 text-white drop-shadow-lg" />
+                        <X className="w-10 h-10 text-white drop-shadow-lg" />
                       )}
                     </motion.div>
-                    
-                    {/* Enhanced particles effect */}
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ 
-                          opacity: [0, 1, 0],
-                          scale: [0, 1, 0],
-                          x: (Math.random() - 0.5) * 200,
-                          y: (Math.random() - 0.5) * 200,
-                        }}
-                        transition={{ 
-                          duration: 1,
-                          delay: i * 0.1,
-                          ease: "easeOut"
-                        }}
-                        className={cn(
-                          "absolute w-3 h-3 rounded-full",
-                          swipeDirection === "right" ? "bg-green-400" : "bg-red-400"
-                        )}
-                      />
-                    ))}
                   </motion.div>
                 )}
               </AnimatePresence>
-
               {/* Basic Info Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                 <div className="flex items-center justify-between mb-2">
@@ -926,14 +881,11 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                   </div>
                   {user.online && <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg animate-pulse"></div>}
                 </div>
-
                 <div className="flex items-center space-x-2 text-white/90 mb-4">
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm font-medium">{user.location}</span>
                 </div>
-
-                {/* Tap to view profile hint */}
-                <motion.div 
+                <motion.div
                   className="flex items-center justify-center space-x-2 text-white/70 text-sm"
                   animate={{ y: [0, -2, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -945,9 +897,8 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
             </div>
           </motion.div>
         </div>
-
         {/* Enhanced Swipe Instructions */}
-        <motion.div 
+        <motion.div
           className="fixed bottom-40 left-0 right-0 flex justify-center px-8 z-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -960,8 +911,7 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
           </div>
         </motion.div>
       </div>
-
-      {/* Full Screen Gallery-First Profile Modal */}
+      {/* --- PROFILE MODAL GALLERY IMPROVEMENTS --- */}
       <AnimatePresence>
         {showProfile && (
           <motion.div
@@ -981,83 +931,95 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
             >
               <div className="h-full overflow-y-auto">
                 {/* Gallery Section - Full Screen */}
-                <div className="relative h-[60vh]">
+                <div className="relative h-[60vh] flex items-center justify-center bg-slate-100">
                   {/* Main Image with Swipe Navigation */}
-                  <div className="relative h-full overflow-hidden">
+                  <div
+                    className="relative h-[90%] w-[90%] max-w-md mx-auto rounded-2xl overflow-hidden shadow-xl flex items-center justify-center"
+                    onClick={() => nextProfileImage()}
+                    style={{ touchAction: 'pan-y' }}
+                  >
                     <motion.div
                       key={profileImageIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
+                      initial={{ opacity: 0, scale: 1.04 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.25 }}
                       className="relative w-full h-full"
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.3}
+                      dragElastic={0.12}
                       onDragStart={() => setIsProfileImageDragging(true)}
                       onDragEnd={(event, info) => {
                         setIsProfileImageDragging(false)
-                        const threshold = 75
+                        const threshold = 40
                         const velocity = Math.abs(info.velocity.x)
-                        
-                        if (Math.abs(info.offset.x) > threshold || velocity > 300) {
-                          if (info.offset.x > 0 || info.velocity.x > 300) {
+                        if (Math.abs(info.offset.x) > threshold || velocity > 180) {
+                          if (info.offset.x > 0 || info.velocity.x > 180) {
                             prevProfileImage()
                           } else {
                             nextProfileImage()
                           }
                         }
                       }}
-                      whileDrag={{ scale: 0.95 }}
+                      whileDrag={{ scale: 0.98 }}
                     >
                       <Image
                         src={user.images[profileImageIndex].url || "/placeholder.svg"}
                         alt={`${user.name} - ${user.images[profileImageIndex].title}`}
                         fill
-                        className="object-cover"
+                        className="object-cover rounded-2xl select-none"
                         sizes="100vw"
+                        draggable={false}
                       />
-                      
                       {/* Swipe hint overlay */}
                       {isProfileImageDragging && (
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center"
+                          className="absolute inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center rounded-2xl"
                         >
-                          <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
+                          <div className="bg-white/30 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
                             <span className="text-white text-sm font-medium">← Swipe to navigate →</span>
                           </div>
                         </motion.div>
                       )}
+                      {/* Left/Right arrow overlays as cues */}
+                      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+                        <div className="bg-black/30 rounded-full p-1 flex items-center justify-center">
+                          <ChevronLeft className="w-5 h-5 text-white/80" />
+                        </div>
+                      </div>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+                        <div className="bg-black/30 rounded-full p-1 flex items-center justify-center">
+                          <ChevronRight className="w-5 h-5 text-white/80" />
+                        </div>
+                      </div>
                     </motion.div>
-
+                    {/* Close Button, Counter, Progress overlays unchanged */}
                     {/* Close Button */}
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setShowProfile(false)}
-                      className="absolute top-6 right-6 w-12 h-12 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg z-10"
+                      className="absolute top-4 right-4 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg z-10"
                     >
-                      <X className="w-6 h-6" />
+                      <X className="w-5 h-5" />
                     </motion.button>
-
                     {/* Image Counter */}
-                    <div className="absolute top-6 left-6 z-10">
-                      <div className="px-4 py-2 bg-black/40 backdrop-blur-sm rounded-full border border-white/30">
-                        <span className="text-white text-sm font-bold">
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className="px-3 py-1 bg-black/40 backdrop-blur-sm rounded-full border border-white/30">
+                        <span className="text-white text-xs font-bold">
                           {profileImageIndex + 1} / {user.images.length}
                         </span>
                       </div>
                     </div>
-
                     {/* Enhanced Image Progress Indicators */}
-                    <div className="absolute bottom-6 left-6 right-6 flex space-x-2 z-10">
+                    <div className="absolute bottom-4 left-4 right-4 flex space-x-2 z-10 justify-center">
                       {user.images.map((_, index) => (
                         <motion.button
                           key={index}
                           onClick={() => setProfileImageIndex(index)}
                           className={cn(
-                            "flex-1 h-2 rounded-full transition-all duration-300 border border-white/30",
+                            "h-2 w-6 rounded-full transition-all duration-300 border border-white/30",
                             index === profileImageIndex ? "bg-white shadow-lg" : "bg-white/30",
                           )}
                           whileHover={{ scale: 1.1 }}
@@ -1068,84 +1030,79 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                         />
                       ))}
                     </div>
-
-                    {/* Image Story Overlay */}
-                    <div className="absolute bottom-20 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                      <motion.div
-                        key={profileImageIndex}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <h3 className="text-white font-bold text-2xl mb-3 drop-shadow-lg">
-                          {user.images[profileImageIndex].title}
-                        </h3>
-                        <p className="text-white/90 text-sm leading-relaxed drop-shadow-sm">
-                          {user.images[profileImageIndex].story}
-                        </p>
-                      </motion.div>
-                    </div>
                   </div>
                 </div>
-
+                {/* Photo description below photo */}
+                <div className="max-w-md mx-auto px-4 pt-4 pb-2">
+                  <motion.div
+                    key={profileImageIndex}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22 }}
+                  >
+                    <h3 className="text-slate-900 font-bold text-lg mb-1">
+                      {user.images[profileImageIndex].title}
+                    </h3>
+                    <p className="text-slate-700 text-sm leading-relaxed">
+                      {user.images[profileImageIndex].story}
+                    </p>
+                  </motion.div>
+                </div>
                 {/* Profile Content */}
                 <div className="p-6 space-y-6 bg-white">
                   {/* Header */}
                   <div className="flex items-center space-x-4">
                     <div className="relative">
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
-                        <span className="text-white font-bold text-2xl">{user.name[0]}</span>
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
+                        <span className="text-white font-bold text-xl">{user.name[0]}</span>
                       </div>
                       {user.online && (
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-3 border-white rounded-full animate-pulse"></div>
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-3 border-white rounded-full animate-pulse"></div>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <h2 className="text-3xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-gray-900">
                           {user.name}, {user.age}
                         </h2>
                         {user.verified && (
-                          <div className="w-8 h-8 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
-                            <Shield className="w-5 h-5 text-white" />
+                          <div className="w-7 h-7 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <Shield className="w-4 h-4 text-white" />
                           </div>
                         )}
                       </div>
                       <div className="flex items-center space-x-2 text-gray-600 mt-2">
-                        <MapPin className="w-5 h-5" />
+                        <MapPin className="w-4 h-4" />
                         <span className="text-base font-medium">{user.location}</span>
                       </div>
                     </div>
                   </div>
-
                   {/* Bio */}
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-3 text-lg">About</h3>
-                    <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-2xl text-base">{user.bio}</p>
+                    <h3 className="font-bold text-gray-900 mb-2 text-base">About</h3>
+                    <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-2xl text-sm">{user.bio}</p>
                   </div>
-
                   {/* Work & Education */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-4 rounded-2xl">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Briefcase className="w-5 h-5 text-slate-600" />
-                        <span className="font-bold text-gray-900">Work</span>
+                    <div className="bg-gray-50 p-3 rounded-2xl">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Briefcase className="w-4 h-4 text-slate-600" />
+                        <span className="font-bold text-gray-900 text-xs">Work</span>
                       </div>
-                      <p className="text-gray-700 font-medium">{user.job}</p>
+                      <p className="text-gray-700 font-medium text-xs">{user.job}</p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-2xl">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <GraduationCap className="w-5 h-5 text-slate-600" />
-                        <span className="font-bold text-gray-900">Education</span>
+                    <div className="bg-gray-50 p-3 rounded-2xl">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <GraduationCap className="w-4 h-4 text-slate-600" />
+                        <span className="font-bold text-gray-900 text-xs">Education</span>
                       </div>
-                      <p className="text-gray-700 font-medium">{user.education}</p>
+                      <p className="text-gray-700 font-medium text-xs">{user.education}</p>
                     </div>
                   </div>
-
                   {/* Interests */}
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-4 text-lg">Interests</h3>
-                    <div className="flex flex-wrap gap-3">
+                    <h3 className="font-bold text-gray-900 mb-2 text-base">Interests</h3>
+                    <div className="flex flex-wrap gap-2">
                       {user.interests.map((interest, index) => {
                         const IconComponent = interestIcons[interest] || Heart
                         return (
@@ -1153,16 +1110,15 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                             key={index}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center space-x-2 px-4 py-3 bg-slate-100 rounded-2xl font-medium text-slate-700 border border-slate-200 shadow-sm"
+                            className="flex items-center space-x-2 px-3 py-2 bg-slate-100 rounded-xl font-medium text-slate-700 border border-slate-200 shadow-sm text-xs"
                           >
-                            <IconComponent className="w-5 h-5" />
+                            <IconComponent className="w-4 h-4" />
                             <span>{interest}</span>
                           </motion.span>
                         )
                       })}
                     </div>
                   </div>
-
                   {/* Action Buttons */}
                   <div className="flex space-x-4 pt-4 pb-8">
                     <motion.button
@@ -1172,9 +1128,9 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                         setShowProfile(false)
                         onRefresh()
                       }}
-                      className="flex-1 h-16 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200"
+                      className="flex-1 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 text-sm"
                     >
-                      <X className="w-6 h-6 mr-3" />
+                      <X className="w-5 h-5 mr-2" />
                       Pass
                     </motion.button>
                     <motion.button
@@ -1184,9 +1140,9 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
                         setShowProfile(false)
                         onLike()
                       }}
-                      className="flex-1 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="flex-1 h-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-sm"
                     >
-                      <Heart className="w-6 h-6 mr-3 fill-current" />
+                      <Heart className="w-5 h-5 mr-2 fill-current" />
                       Like
                     </motion.button>
                   </div>
