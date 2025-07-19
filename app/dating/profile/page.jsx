@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import {
   Bell,
   Settings,
@@ -13,7 +15,6 @@ import {
   Camera,
   ChevronRight,
   Shield,
-  Sparkles,
   Music,
   Book,
   Dumbbell,
@@ -29,8 +30,15 @@ import {
   Film,
   Headphones,
   GraduationCap,
-  ArrowLeft,
   LogOut,
+  Heart,
+  Users,
+  Baby,
+  Briefcase,
+  MapPin,
+  Save,
+  Upload,
+  X,
 } from "lucide-react"
 import Image from "next/image"
 import { motion } from "motion/react"
@@ -60,161 +68,665 @@ const interestIcons = {
   Technology: Code,
   Gaming: Gamepad2,
   Coding: Code,
+  Meditation: Users,
+  Volunteering: Heart,
+  Gardening: Mountain,
+  Fashion: Palette,
+  Networking: Users,
+  Writing: Book,
+  Podcasts: Headphones,
+  Investing: Briefcase,
+  Languages: GraduationCap,
+  Startups: Code,
+  Sustainability: Mountain,
+  Wellness: Heart,
 }
 
 // Enhanced Profile Settings Component
 const ProfileSettings = ({ onBack }) => {
   const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
   const [profile, setProfile] = useState({
-    name: "John",
-    age: 28,
-    bio: "Software engineer who loves hiking and photography",
-    job: "Software Engineer",
-    education: "Stanford University",
-    height: "6'0\"",
-    interests: ["Technology", "Hiking", "Photography", "Travel"],
+    // Basic Information
+    firstName: "John",
+    lastName: "Doe",
+    dateOfBirth: "1995-06-15",
+    gender: "man",
+    sexualOrientation: "straight",
+    location: "San Francisco, CA",
+
+    // Physical Details
+    height: 72, // inches
+    bodyType: "athletic",
+    ethnicity: "white",
+
+    // Lifestyle
+    education: "bachelors",
+    occupation: "Software Engineer",
+    company: "Tech Corp",
+    religion: "agnostic",
+    smoking: "never",
+    drinking: "socially",
+    exercise: "often",
+
+    // Family
+    hasChildren: "no",
+    wantsChildren: "maybe",
+
+    // Dating Preferences
+    relationshipGoals: "long-term",
+    ageRangePreference: [25, 35],
+    maxDistance: 25,
+
+    // Profile
+    bio: "Software engineer who loves hiking and photography. Always up for trying new restaurants and exploring the city!",
+    interests: ["Technology", "Hiking", "Photography", "Travel", "Coffee", "Fitness"],
+
+    // Photos
+    photos: [
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
   })
+
+  const [activeSection, setActiveSection] = useState("basic")
+  const [isSaving, setIsSaving] = useState(false)
+
+  const updateProfile = useCallback((key, value) => {
+    setProfile((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  const handleInterestToggle = (interest) => {
+    const newInterests = profile.interests.includes(interest)
+      ? profile.interests.filter((i) => i !== interest)
+      : [...profile.interests, interest]
+    updateProfile("interests", newInterests)
+  }
+
+  const handlePhotoUpload = (index) => {
+    // Simulate photo upload
+    const newPhotos = [...profile.photos]
+    newPhotos[index] =
+      `https://images.unsplash.com/photo-${Math.random().toString(36).substr(2, 9)}?w=400&h=400&fit=crop`
+    updateProfile("photos", newPhotos)
+  }
+
+  const handlePhotoRemove = (index) => {
+    const newPhotos = [...profile.photos]
+    newPhotos[index] = null
+    updateProfile("photos", newPhotos)
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsSaving(false)
+    // Show success message or redirect
+  }
+
+  const formatHeight = (inches) => {
+    const feet = Math.floor(inches / 12)
+    const remainingInches = inches % 12
+    return `${feet}'${remainingInches}"`
+  }
+
+  const calculateAge = (dateOfBirth) => {
+    const today = new Date()
+    const birthDate = new Date(dateOfBirth)
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    return age
+  }
+
+  const sections = [
+    { id: "basic", label: "Basic Info", icon: User },
+    { id: "physical", label: "Physical", icon: Dumbbell },
+    { id: "lifestyle", label: "Lifestyle", icon: Coffee },
+    { id: "family", label: "Family", icon: Baby },
+    { id: "dating", label: "Dating", icon: Heart },
+    { id: "profile", label: "Profile", icon: Edit },
+    { id: "photos", label: "Photos", icon: Camera },
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        title="Edit Profile" 
-        onBack={onBack}
-        sidebarCollapsed={sidebarCollapsed}
-        isMobile={isMobile}
-      />
+      <Header title="Edit Profile" onBack={onBack} sidebarCollapsed={sidebarCollapsed} isMobile={isMobile} />
 
-      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6 max-w-2xl mx-auto">
-        <div className="space-y-6 sm:space-y-8">
-          {/* Enhanced Profile Photos */}
-          <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
-            <h3 className="font-bold mb-4 sm:mb-6 text-gray-900 tracking-tight text-lg sm:text-xl">Photos</h3>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-              {[1, 2, 3, 4, 5, 6].map((index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="aspect-square bg-gray-50 rounded-xl sm:rounded-2xl md:rounded-3xl flex items-center justify-center border-2 border-dashed border-gray-200 hover:border-slate-400 transition-all duration-200 cursor-pointer"
-                >
-                  {index === 1 ? (
-                    <Image
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face"
-                      alt="Profile"
-                      width={200}
-                      height={200}
-                      className="w-full h-full object-cover rounded-xl sm:rounded-2xl md:rounded-3xl"
+      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6 max-w-4xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
+          {/* Section Navigation */}
+          <div className="lg:w-64 flex-shrink-0">
+            <Card className="p-4 bg-white shadow-sm border border-gray-100 rounded-2xl">
+              <h3 className="font-bold mb-4 text-gray-900">Edit Sections</h3>
+              <div className="space-y-1">
+                {sections.map((section) => {
+                  const IconComponent = section.icon
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={cn(
+                        "w-full flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 text-left",
+                        activeSection === section.id
+                          ? "bg-slate-100 text-slate-700 font-medium"
+                          : "hover:bg-gray-50 text-gray-600",
+                      )}
+                    >
+                      <IconComponent className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm">{section.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <Card className="p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl">
+              {/* Basic Information */}
+              {activeSection === "basic" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Basic Information</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">First Name</Label>
+                      <Input
+                        value={profile.firstName}
+                        onChange={(e) => updateProfile("firstName", e.target.value)}
+                        className="border-gray-200 focus:border-slate-400 rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Last Name</Label>
+                      <Input
+                        value={profile.lastName}
+                        onChange={(e) => updateProfile("lastName", e.target.value)}
+                        className="border-gray-200 focus:border-slate-400 rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Date of Birth</Label>
+                    <Input
+                      type="date"
+                      value={profile.dateOfBirth}
+                      onChange={(e) => updateProfile("dateOfBirth", e.target.value)}
+                      className="border-gray-200 focus:border-slate-400 rounded-xl"
                     />
-                  ) : (
-                    <Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-gray-400" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </Card>
+                    <p className="text-xs text-gray-500 mt-1">Age: {calculateAge(profile.dateOfBirth)}</p>
+                  </div>
 
-          {/* Enhanced Basic Info */}
-          <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
-            <h3 className="font-bold mb-4 sm:mb-6 text-gray-900 tracking-tight text-lg sm:text-xl">Basic Information</h3>
-            <div className="space-y-4 sm:space-y-6">
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Name</label>
-                <Input
-                  value={profile.name}
-                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                  className="border-gray-200 focus:border-slate-400 rounded-xl font-medium"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Age</label>
-                <Input
-                  type="number"
-                  value={profile.age}
-                  onChange={(e) => setProfile({ ...profile, age: Number.parseInt(e.target.value) })}
-                  className="border-gray-200 focus:border-slate-400 rounded-xl font-medium"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Bio</label>
-                <textarea
-                  value={profile.bio}
-                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                  className="w-full p-3 border border-gray-200 rounded-xl resize-none h-20 sm:h-24 focus:border-slate-400 focus:outline-none transition-all duration-200 font-medium"
-                  placeholder="Tell us about yourself..."
-                />
-              </div>
-            </div>
-          </Card>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Gender</Label>
+                    <Select value={profile.gender} onValueChange={(value) => updateProfile("gender", value)}>
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="man">Man</SelectItem>
+                        <SelectItem value="woman">Woman</SelectItem>
+                        <SelectItem value="non-binary">Non-binary</SelectItem>
+                        <SelectItem value="transgender">Transgender</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Enhanced Work & Education */}
-          <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
-            <h3 className="font-bold mb-4 sm:mb-6 text-gray-900 tracking-tight text-lg sm:text-xl">Work & Education</h3>
-            <div className="space-y-4 sm:space-y-6">
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Job Title</label>
-                <Input
-                  value={profile.job}
-                  onChange={(e) => setProfile({ ...profile, job: e.target.value })}
-                  className="border-gray-200 focus:border-slate-400 rounded-xl font-medium"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Education</label>
-                <Input
-                  value={profile.education}
-                  onChange={(e) => setProfile({ ...profile, education: e.target.value })}
-                  className="border-gray-200 focus:border-slate-400 rounded-xl font-medium"
-                />
-              </div>
-            </div>
-          </Card>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Sexual Orientation</Label>
+                    <Select
+                      value={profile.sexualOrientation}
+                      onValueChange={(value) => updateProfile("sexualOrientation", value)}
+                    >
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="straight">Straight</SelectItem>
+                        <SelectItem value="gay">Gay</SelectItem>
+                        <SelectItem value="lesbian">Lesbian</SelectItem>
+                        <SelectItem value="bisexual">Bisexual</SelectItem>
+                        <SelectItem value="pansexual">Pansexual</SelectItem>
+                        <SelectItem value="asexual">Asexual</SelectItem>
+                        <SelectItem value="demisexual">Demisexual</SelectItem>
+                        <SelectItem value="queer">Queer</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Enhanced Interests */}
-          <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
-            <h3 className="font-bold mb-4 sm:mb-6 text-gray-900 tracking-tight text-lg sm:text-xl">Interests</h3>
-            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-3">
-              {Object.keys(interestIcons).map((interest) => {
-                const IconComponent = interestIcons[interest]
-                const isSelected = profile.interests.includes(interest)
-                return (
-                  <motion.button
-                    key={interest}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      if (isSelected) {
-                        setProfile({
-                          ...profile,
-                          interests: profile.interests.filter((i) => i !== interest),
-                        })
-                      } else {
-                        setProfile({
-                          ...profile,
-                          interests: [...profile.interests, interest],
-                        })
-                      }
-                    }}
-                    className={cn(
-                      "flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all duration-200",
-                      isSelected
-                        ? "border-slate-400 bg-slate-50 text-slate-700 shadow-sm"
-                        : "border-gray-200 hover:border-slate-300",
-                    )}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Location</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        value={profile.location}
+                        onChange={(e) => updateProfile("location", e.target.value)}
+                        className="border-gray-200 focus:border-slate-400 rounded-xl pl-10"
+                        placeholder="City, State"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Physical Details */}
+              {activeSection === "physical" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Physical Details</h3>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Height</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        min="48"
+                        max="96"
+                        value={profile.height}
+                        onChange={(e) => updateProfile("height", Number.parseInt(e.target.value))}
+                        className="border-gray-200 focus:border-slate-400 rounded-xl w-24"
+                      />
+                      <span className="text-gray-500">inches ({formatHeight(profile.height)})</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Body Type</Label>
+                    <Select value={profile.bodyType} onValueChange={(value) => updateProfile("bodyType", value)}>
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="slim">Slim</SelectItem>
+                        <SelectItem value="athletic">Athletic</SelectItem>
+                        <SelectItem value="average">Average</SelectItem>
+                        <SelectItem value="curvy">Curvy</SelectItem>
+                        <SelectItem value="plus-size">Plus size</SelectItem>
+                        <SelectItem value="muscular">Muscular</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Ethnicity</Label>
+                    <Select value={profile.ethnicity} onValueChange={(value) => updateProfile("ethnicity", value)}>
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asian">Asian</SelectItem>
+                        <SelectItem value="black">Black/African American</SelectItem>
+                        <SelectItem value="hispanic">Hispanic/Latino</SelectItem>
+                        <SelectItem value="white">White/Caucasian</SelectItem>
+                        <SelectItem value="middle-eastern">Middle Eastern</SelectItem>
+                        <SelectItem value="native-american">Native American</SelectItem>
+                        <SelectItem value="pacific-islander">Pacific Islander</SelectItem>
+                        <SelectItem value="mixed">Mixed/Multiracial</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Lifestyle */}
+              {activeSection === "lifestyle" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Lifestyle</h3>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Education</Label>
+                    <Select value={profile.education} onValueChange={(value) => updateProfile("education", value)}>
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high-school">High School</SelectItem>
+                        <SelectItem value="some-college">Some College</SelectItem>
+                        <SelectItem value="associates">Associate's Degree</SelectItem>
+                        <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                        <SelectItem value="masters">Master's Degree</SelectItem>
+                        <SelectItem value="phd">PhD/Doctorate</SelectItem>
+                        <SelectItem value="trade-school">Trade School</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Occupation</Label>
+                      <Input
+                        value={profile.occupation}
+                        onChange={(e) => updateProfile("occupation", e.target.value)}
+                        className="border-gray-200 focus:border-slate-400 rounded-xl"
+                        placeholder="Job title"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Company</Label>
+                      <Input
+                        value={profile.company}
+                        onChange={(e) => updateProfile("company", e.target.value)}
+                        className="border-gray-200 focus:border-slate-400 rounded-xl"
+                        placeholder="Company name"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Religion</Label>
+                    <Select value={profile.religion} onValueChange={(value) => updateProfile("religion", value)}>
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="christian">Christian</SelectItem>
+                        <SelectItem value="catholic">Catholic</SelectItem>
+                        <SelectItem value="jewish">Jewish</SelectItem>
+                        <SelectItem value="muslim">Muslim</SelectItem>
+                        <SelectItem value="hindu">Hindu</SelectItem>
+                        <SelectItem value="buddhist">Buddhist</SelectItem>
+                        <SelectItem value="sikh">Sikh</SelectItem>
+                        <SelectItem value="spiritual">Spiritual</SelectItem>
+                        <SelectItem value="agnostic">Agnostic</SelectItem>
+                        <SelectItem value="atheist">Atheist</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Smoking</Label>
+                      <Select value={profile.smoking} onValueChange={(value) => updateProfile("smoking", value)}>
+                        <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="never">Never</SelectItem>
+                          <SelectItem value="socially">Socially</SelectItem>
+                          <SelectItem value="regularly">Regularly</SelectItem>
+                          <SelectItem value="trying-to-quit">Trying to quit</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Drinking</Label>
+                      <Select value={profile.drinking} onValueChange={(value) => updateProfile("drinking", value)}>
+                        <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="never">Never</SelectItem>
+                          <SelectItem value="socially">Socially</SelectItem>
+                          <SelectItem value="regularly">Regularly</SelectItem>
+                          <SelectItem value="occasionally">Occasionally</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Exercise</Label>
+                      <Select value={profile.exercise} onValueChange={(value) => updateProfile("exercise", value)}>
+                        <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="never">Never</SelectItem>
+                          <SelectItem value="rarely">Rarely</SelectItem>
+                          <SelectItem value="sometimes">Sometimes</SelectItem>
+                          <SelectItem value="often">Often</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Family */}
+              {activeSection === "family" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Family</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Do you have children?</Label>
+                      <Select
+                        value={profile.hasChildren}
+                        onValueChange={(value) => updateProfile("hasChildren", value)}
+                      >
+                        <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="yes">Yes</SelectItem>
+                          <SelectItem value="no">No</SelectItem>
+                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Do you want children?</Label>
+                      <Select
+                        value={profile.wantsChildren}
+                        onValueChange={(value) => updateProfile("wantsChildren", value)}
+                      >
+                        <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="yes">Yes</SelectItem>
+                          <SelectItem value="no">No</SelectItem>
+                          <SelectItem value="maybe">Maybe/Open to it</SelectItem>
+                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Dating Preferences */}
+              {activeSection === "dating" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Dating Preferences</h3>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Relationship Goals</Label>
+                    <Select
+                      value={profile.relationshipGoals}
+                      onValueChange={(value) => updateProfile("relationshipGoals", value)}
+                    >
+                      <SelectTrigger className="border-gray-200 focus:border-slate-400 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="long-term">Long-term relationship</SelectItem>
+                        <SelectItem value="marriage">Marriage</SelectItem>
+                        <SelectItem value="casual">Casual dating</SelectItem>
+                        <SelectItem value="friendship">Friendship</SelectItem>
+                        <SelectItem value="hookups">Hookups</SelectItem>
+                        <SelectItem value="figuring-out">Still figuring it out</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Age Range Preference</Label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        type="number"
+                        min="18"
+                        max="100"
+                        value={profile.ageRangePreference[0]}
+                        onChange={(e) =>
+                          updateProfile("ageRangePreference", [
+                            Number.parseInt(e.target.value),
+                            profile.ageRangePreference[1],
+                          ])
+                        }
+                        className="w-20 border-gray-200 focus:border-slate-400 rounded-xl"
+                      />
+                      <span className="text-gray-500">to</span>
+                      <Input
+                        type="number"
+                        min="18"
+                        max="100"
+                        value={profile.ageRangePreference[1]}
+                        onChange={(e) =>
+                          updateProfile("ageRangePreference", [
+                            profile.ageRangePreference[0],
+                            Number.parseInt(e.target.value),
+                          ])
+                        }
+                        className="w-20 border-gray-200 focus:border-slate-400 rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Maximum Distance</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={profile.maxDistance}
+                        onChange={(e) => updateProfile("maxDistance", Number.parseInt(e.target.value))}
+                        className="w-24 border-gray-200 focus:border-slate-400 rounded-xl"
+                      />
+                      <span className="text-gray-500">miles</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Profile */}
+              {activeSection === "profile" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Profile Details</h3>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Bio</Label>
+                    <textarea
+                      value={profile.bio}
+                      onChange={(e) => updateProfile("bio", e.target.value)}
+                      className="w-full p-3 border border-gray-200 rounded-xl resize-none h-32 focus:border-slate-400 focus:outline-none transition-all duration-200"
+                      placeholder="Tell people about yourself..."
+                      maxLength={500}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{profile.bio.length}/500 characters</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-4 block">Interests</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-80 overflow-y-auto pr-2">
+                      {Object.entries(interestIcons).map(([interest, IconComponent]) => {
+                        const isSelected = profile.interests.includes(interest)
+                        return (
+                          <motion.button
+                            key={interest}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleInterestToggle(interest)}
+                            className={cn(
+                              "flex items-center space-x-2 p-3 rounded-xl border-2 transition-all duration-200",
+                              isSelected
+                                ? "border-slate-400 bg-slate-50 text-slate-700 shadow-sm"
+                                : "border-gray-200 hover:border-slate-300",
+                            )}
+                          >
+                            <IconComponent className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium truncate">{interest}</span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Photos */}
+              {activeSection === "photos" && (
+                <div className="space-y-6">
+                  <h3 className="font-bold text-xl text-gray-900">Photos</h3>
+                  <p className="text-gray-600">Add up to 6 photos to showcase your personality</p>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {profile.photos.map((photo, index) => (
+                      <div key={index} className="aspect-square relative">
+                        {photo ? (
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={photo || "/placeholder.svg"}
+                              alt={`Profile photo ${index + 1}`}
+                              fill
+                              className="object-cover rounded-2xl"
+                            />
+                            <button
+                              onClick={() => handlePhotoRemove(index)}
+                              className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                            {index === 0 && (
+                              <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                Main
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handlePhotoUpload(index)}
+                            className="w-full h-full bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 hover:border-slate-400 transition-all duration-200 flex flex-col items-center justify-center"
+                          >
+                            <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-500">Add Photo</span>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Save Button */}
+              <div className="pt-6 border-t border-gray-200">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="w-full py-4 rounded-xl font-semibold bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-800 hover:to-slate-950 text-white shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
-                    <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span className="text-sm font-medium truncate">{interest}</span>
-                  </motion.button>
-                )
-              })}
-            </div>
-          </Card>
-
-          {/* Enhanced Save Button */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-800 hover:to-slate-950 text-white shadow-xl hover:shadow-2xl transition-all duration-300">
-              Save Changes
-            </Button>
-          </motion.div>
+                    {isSaving ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
@@ -231,11 +743,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        title="Profile"
-        sidebarCollapsed={sidebarCollapsed}
-        isMobile={isMobile}
-      />
+      <Header title="Profile" sidebarCollapsed={sidebarCollapsed} isMobile={isMobile} />
       <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
           {/* Enhanced Profile Preview */}
@@ -285,15 +793,15 @@ export default function ProfilePage() {
                   <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 </motion.button>
               ))}
-              
+
               {/* Sign Out Button */}
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={() => {
                   // Handle sign out logic here
-                  console.log('Sign out clicked from profile')
-                  window.location.href = '/signin'
+                  console.log("Sign out clicked from profile")
+                  window.location.href = "/signin"
                 }}
                 className="flex items-center justify-between w-full p-3 sm:p-4 md:p-5 hover:bg-red-50 rounded-xl sm:rounded-2xl transition-all duration-200 border-t border-gray-100 mt-4"
               >

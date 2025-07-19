@@ -771,144 +771,141 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh }) => {
   }
   return (
     <>
-      <div className="min-h-screen bg-gray-50 flex flex-col relative overflow-hidden">
-        {/* Main Card Container */}
-        <div className="flex-1 flex items-center justify-center p-4 pt-20 pb-32">
-          <motion.div
-            className="relative w-full max-w-sm h-[75vh] bg-white rounded-2xl shadow-2xl overflow-hidden cursor-pointer"
-            drag
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={0.04}
-            dragMomentum={false}
-            onDragStart={handleDragStart}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-            animate={{
-              x: dragOffset.x,
-              y: 0,
-              rotate: (dragOffset.x / MAX_SWIPE_X) * MAX_ROTATE,
-              scale: isDragging ? 1.01 : 1,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 700,
-              damping: 40,
-              duration: isDragging ? 0 : 0.25,
-            }}
-            onClick={handleCardTap}
-            whileTap={{ scale: 0.98 }}
-            style={{ transformOrigin: "center bottom" }}
-          >
-            {/* Cover Image */}
-            <div className="relative h-full overflow-hidden" onClick={handleImageTap}>
-              <motion.div
-                key={currentImageIndex}
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.25 }}
-                className="relative w-full h-full"
-              >
-                <Image
-                  src={user.images[currentImageIndex].url || "/placeholder.svg"}
-                  alt={`${user.name}`}
-                  fill
-                  className="object-cover"
-                  sizes="100vw"
-                  priority={true}
-                />
-              </motion.div>
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              {/* Image Progress Indicators */}
-              <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
-                {user.images.map((_, index) => (
-                  <motion.div
-                    key={index}
-                    className={cn(
-                      "flex-1 h-1.5 rounded-full transition-all duration-300",
-                      index === currentImageIndex ? "bg-white shadow-lg" : "bg-white/30",
-                    )}
-                    animate={{
-                      scale: index === currentImageIndex ? 1.15 : 1,
-                    }}
+      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-10 overflow-hidden">
+        {/* Main Card Container - slightly above center for better balance */}
+        <div className="w-full flex items-center justify-center p-4" style={{ minHeight: '100vh', alignItems: 'flex-start' }}>
+          <div style={{ marginTop: '8vh', width: '100%' }}>
+            <motion.div
+              className="relative w-full max-w-sm h-[75vh] bg-white rounded-2xl shadow-2xl overflow-hidden cursor-pointer"
+              drag
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              dragElastic={0.04}
+              dragMomentum={false}
+              onDragStart={handleDragStart}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+              animate={{
+                x: dragOffset.x,
+                y: 0,
+                rotate: (dragOffset.x / MAX_SWIPE_X) * MAX_ROTATE,
+                scale: isDragging ? 1.01 : 1,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 700,
+                damping: 40,
+                duration: isDragging ? 0 : 0.25,
+              }}
+              onClick={handleCardTap}
+              whileTap={{ scale: 0.98 }}
+              style={{ transformOrigin: "center bottom" }}
+            >
+              {/* Cover Image */}
+              <div className="relative h-full overflow-hidden" onClick={handleImageTap}>
+                <motion.div
+                  key={currentImageIndex}
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.25 }}
+                  className="relative w-full h-full"
+                >
+                  <Image
+                    src={user.images[currentImageIndex].url || "/placeholder.svg"}
+                    alt={`${user.name}`}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    priority={true}
                   />
-                ))}
-              </div>
-              {/* Polished Swipe Direction Overlays */}
-              <AnimatePresence>
-                {swipeDirection && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 0.9, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
-                    className={cn(
-                      "absolute inset-0 flex items-center justify-center backdrop-blur-[2px]",
-                      swipeDirection === "right" ? "bg-green-400/20" : "bg-red-400/20",
-                    )}
-                  >
+                </motion.div>
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                {/* Image Progress Indicators */}
+                <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
+                  {user.images.map((_, index) => (
                     <motion.div
-                      initial={{ scale: 0.7, rotate: -180 }}
-                      animate={{ scale: [0.7, 1.1, 1], rotate: 0 }}
-                      transition={{ scale: { duration: 0.22, ease: "easeOut" }, rotate: { duration: 0.18 } }}
+                      key={index}
                       className={cn(
-                        "w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-2xl",
-                        swipeDirection === "right"
-                          ? "bg-green-500 border-green-300 shadow-green-500/40"
-                          : "bg-red-500 border-red-300 shadow-red-500/40",
+                        "flex-1 h-1.5 rounded-full transition-all duration-300",
+                        index === currentImageIndex ? "bg-white shadow-lg" : "bg-white/30",
+                      )}
+                      animate={{
+                        scale: index === currentImageIndex ? 1.15 : 1,
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Polished Swipe Direction Overlays */}
+                <AnimatePresence>
+                  {swipeDirection && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.7 }}
+                      animate={{ opacity: 0.9, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.7 }}
+                      className={cn(
+                        "absolute inset-0 flex items-center justify-center backdrop-blur-[2px]",
+                        swipeDirection === "right" ? "bg-green-400/20" : "bg-red-400/20",
                       )}
                     >
-                      {swipeDirection === "right" ? (
-                        <Heart className="w-10 h-10 text-white fill-current drop-shadow-lg" />
-                      ) : (
-                        <X className="w-10 h-10 text-white drop-shadow-lg" />
-                      )}
+                      <motion.div
+                        initial={{ scale: 0.7, rotate: -180 }}
+                        animate={{ scale: [0.7, 1.1, 1], rotate: 0 }}
+                        transition={{ scale: { duration: 0.22, ease: "easeOut" }, rotate: { duration: 0.18 } }}
+                        className={cn(
+                          "w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-2xl",
+                          swipeDirection === "right"
+                            ? "bg-green-500 border-green-300 shadow-green-500/40"
+                            : "bg-red-500 border-red-300 shadow-red-500/40",
+                        )}
+                      >
+                        {swipeDirection === "right" ? (
+                          <Heart className="w-10 h-10 text-white fill-current drop-shadow-lg" />
+                        ) : (
+                          <X className="w-10 h-10 text-white drop-shadow-lg" />
+                        )}
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              {/* Basic Info Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <h1 className="text-3xl font-bold text-white drop-shadow-lg">
-                      {user.name}, {user.age}
-                    </h1>
-                    {user.verified && (
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                        <Shield className="w-4 h-4 text-white" />
-                      </div>
-                    )}
+                  )}
+                </AnimatePresence>
+                {/* Basic Info Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-3">
+                      <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+                        {user.name}, {user.age}
+                      </h1>
+                      {user.verified && (
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                          <Shield className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    {user.online && <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg animate-pulse"></div>}
                   </div>
-                  {user.online && <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg animate-pulse"></div>}
+                  <div className="flex items-center space-x-2 text-white/90 mb-4">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm font-medium">{user.location}</span>
+                  </div>
+                  <motion.div
+                    className="flex items-center justify-center space-x-2 text-white/70 text-sm"
+                    animate={{ y: [0, -2, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <span>Tap to view profile</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
                 </div>
-                <div className="flex items-center space-x-2 text-white/90 mb-4">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm font-medium">{user.location}</span>
-                </div>
-                <motion.div
-                  className="flex items-center justify-center space-x-2 text-white/70 text-sm"
-                  animate={{ y: [0, -2, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <span>Tap to view profile</span>
-                  <ChevronDown className="w-4 h-4" />
-                </motion.div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
         {/* Enhanced Swipe Instructions */}
         <motion.div
-          className="fixed bottom-40 left-0 right-0 flex justify-center px-8 z-20"
+          className="fixed bottom-32 left-0 right-0 flex justify-center px-8 z-20 pointer-events-none"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <div className="bg-black/70 backdrop-blur-md rounded-full px-6 py-3 border border-white/20 shadow-xl">
-            <p className="text-white text-sm font-medium text-center">
-              <span className="text-green-400">❤️ Swipe right</span> • <span className="text-red-400">✗ Swipe left</span>
-            </p>
-          </div>
         </motion.div>
       </div>
       {/* --- PROFILE MODAL GALLERY IMPROVEMENTS --- */}
