@@ -1223,33 +1223,8 @@ const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superLikeUsed
                       })}
                     </div>
                   </div>
-                  {/* Action Buttons */}
-                  <div className="flex space-x-4 pt-4 pb-8">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setShowProfile(false)
-                        onRefresh()
-                      }}
-                      className="flex-1 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 text-sm"
-                    >
-                      <X className="w-5 h-5 mr-2" />
-                      Pass
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setShowProfile(false)
-                        onLike()
-                      }}
-                      className="flex-1 h-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-sm"
-                    >
-                      <Heart className="w-5 h-5 mr-2 fill-current" />
-                      Like
-                    </motion.button>
-                  </div>
+                  {/* Bottom padding for scrolling */}
+                  <div className="pb-8"></div>
                 </div>
               </div>
             </motion.div>
