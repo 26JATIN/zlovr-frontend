@@ -83,12 +83,13 @@ const Header = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="#" className="flex items-center space-x-2">
-              <div className={cn(
-                "w-10 h-10 rounded-full bg-gradient-to-r from-slate-700 to-slate-900 flex items-center justify-center transition-all duration-300 shadow-lg",
-                isScrolled && "shadow-slate-200"
-              )}>
-                <Heart className="w-5 h-5 text-white" />
-              </div>
+              <Image
+                src="/heart-logo.png"
+                alt="zlovr logo"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain"
+              />
               <span className={cn(
                 "text-2xl font-bold transition-colors duration-300",
                 isScrolled ? "text-gray-900" : "text-white"

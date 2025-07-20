@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Suspense } from "react"
+import Image from "next/image"
 
 const navigation = [
   {
@@ -108,9 +109,13 @@ const DesktopSidebar = ({ collapsed, setCollapsed, pathname }) => {
       <div className="overflow-hidden h-full flex flex-col p-6">
         {/* Logo Section */}
         <div className="flex items-center flex-shrink-0 mb-8 h-10">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <Image
+            src="/heart-logo.png"
+            alt="zlovr logo"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-contain flex-shrink-0"
+          />
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{
@@ -327,9 +332,13 @@ const MobileSidebar = ({ sidebarOpen, setSidebarOpen, pathname }) => {
               {/* Mobile header */}
               <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center">
-                    <Sparkles className="text-white w-4 h-4" />
-                  </div>
+                  <Image
+                    src="/heart-logo.png"
+                    alt="zlovr logo"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 object-contain"
+                  />
                   <span className="text-xl font-bold text-gray-900">zlovr Admin</span>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>

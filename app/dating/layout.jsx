@@ -37,6 +37,7 @@ import {
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { FilterModal } from "@/components/filter-modal"
+import Image from "next/image"
 
 // Create a context to share header functionality
 import { createContext, useContext } from "react"
@@ -136,9 +137,13 @@ const DesktopSidebar = ({ activeTab, onTabChange, collapsed, setCollapsed, onFil
       <div className="overflow-hidden h-full flex flex-col p-6">
         {/* Logo Section */}
         <div className="flex items-center flex-shrink-0 mb-8 h-10">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <Image
+            src="/heart-logo.png"
+            alt="zlovr logo"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-contain flex-shrink-0"
+          />
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ 
