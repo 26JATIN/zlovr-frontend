@@ -31,7 +31,6 @@ import {
   AnimatePresence,
 } from "motion/react"
 import MagicBento from "@/components/MagicBento"
-import SplashCursor from "@/components/SplashCursor"
 import { TracingBeam } from "@/components/ui/tracing-beam"
 
 // Modern Header Component
@@ -406,14 +405,16 @@ export default function HomePage() {
   const [quoteScrollProgress, setQuoteScrollProgress] = useState(0)
   const loveQuotesSectionRef = useRef(null)
   const [hideNavForQuotes, setHideNavForQuotes] = useState(false)
+  const [isQuotesVisible, setIsQuotesVisible] = useState(false)
 
-  // IntersectionObserver to auto-hide navbar when love quotes section is in view
+  // IntersectionObserver to auto-hide navbar and track visibility for SplashCursor
   useEffect(() => {
     const section = loveQuotesSectionRef.current
     if (!section) return
     const observer = new window.IntersectionObserver(
       ([entry]) => {
         setHideNavForQuotes(entry.isIntersecting)
+        setIsQuotesVisible(entry.isIntersecting)
       },
       { threshold: 0.5 }
     )
@@ -421,7 +422,9 @@ export default function HomePage() {
     return () => observer.disconnect()
   }, [])
 
+  // Optimized scroll progress handler
   useEffect(() => {
+    let lastProgress = quoteScrollProgress
     const handleScroll = () => {
       if (!loveQuotesSectionRef.current) return
       const section = loveQuotesSectionRef.current
@@ -431,7 +434,11 @@ export default function HomePage() {
         const sectionScrolled = Math.abs(rect.top)
         const totalScrollableHeight = rect.height - viewportHeight
         let progress = Math.min(sectionScrolled / totalScrollableHeight, 1)
-        setQuoteScrollProgress(progress)
+        progress = Math.round(progress * 100) / 100 // 2 decimal places
+        if (progress !== lastProgress) {
+          lastProgress = progress
+          setQuoteScrollProgress(progress)
+        }
       }
     }
     let ticking = false
@@ -450,8 +457,8 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", throttledHandleScroll)
   }, [])
 
-  // Love Quote Card (like StoryCard)
-  const LoveQuoteCard = ({ quote, index, scrollProgress }) => {
+  // Memoized LoveQuoteCard
+  const LoveQuoteCard = React.memo(({ quote, index, scrollProgress }) => {
     // Calculate progress for this quote
     const total = loveQuotes.length
     const quoteStart = index / (total - 1)
@@ -495,23 +502,6 @@ export default function HomePage() {
           {/* Background Image */}
           <div className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0" style={{ backgroundImage: `url('${quote.image}')` }}>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-          </div>
-          {/* Splash Cursor over photo, under text */}
-          <div className="absolute inset-0 z-10 pointer-events-none">
-            <SplashCursor
-              SIM_RESOLUTION={64}
-              DYE_RESOLUTION={512}
-              DENSITY_DISSIPATION={2.5}
-              VELOCITY_DISSIPATION={1.8}
-              PRESSURE={0.05}
-              CURL={1}
-              SPLAT_RADIUS={0.12}
-              SPLAT_FORCE={1500}
-              SHADING={false}
-              COLOR_UPDATE_SPEED={3}
-              BACK_COLOR={{ r: 0.02, g: 0.01, b: 0.02 }}
-              TRANSPARENT={true}
-            />
           </div>
           {/* Quote block */}
           <div className={`absolute bottom-0 w-full p-8 md:p-16 flex items-end z-20 ${quote.position === 'left' ? 'justify-start' : quote.position === 'right' ? 'justify-end' : 'justify-center'}`}>
@@ -575,23 +565,6 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0" style={{ backgroundImage: `url('${quote.image}')` }}>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
         </div>
-        {/* Splash Cursor over photo, under text */}
-        <div className="absolute inset-0 z-10 pointer-events-none">
-          <SplashCursor
-            SIM_RESOLUTION={64}
-            DYE_RESOLUTION={512}
-            DENSITY_DISSIPATION={2.5}
-            VELOCITY_DISSIPATION={1.8}
-            PRESSURE={0.05}
-            CURL={1}
-            SPLAT_RADIUS={0.12}
-            SPLAT_FORCE={1500}
-            SHADING={false}
-            COLOR_UPDATE_SPEED={3}
-            BACK_COLOR={{ r: 0.02, g: 0.01, b: 0.02 }}
-            TRANSPARENT={true}
-          />
-        </div>
         {/* Quote block */}
         <div className={`absolute bottom-0 w-full p-8 md:p-16 flex items-end z-20 ${quote.position === 'left' ? 'justify-start' : quote.position === 'right' ? 'justify-end' : 'justify-center'}`}>
           <div className={`max-w-2xl ${quote.position === 'center' ? 'text-center' : quote.position === 'right' ? 'text-right ml-auto' : ''}`}> 
@@ -608,7 +581,7 @@ export default function HomePage() {
         </div>
       </div>
     )
-  }
+  })
 
   return (
     <div className="min-h-screen">
@@ -619,20 +592,11 @@ export default function HomePage() {
       <section className="relative h-screen hero-bg flex items-center justify-center overflow-hidden pt-0">
         {/* Heart-themed Splash Cursor Animation - constrained to hero section */}
         <div className="absolute inset-0 z-0">
-          <SplashCursor
-            SIM_RESOLUTION={64}
-            DYE_RESOLUTION={512}
-            DENSITY_DISSIPATION={2.5}
-            VELOCITY_DISSIPATION={1.8}
-            PRESSURE={0.05}
-            CURL={1}
-            SPLAT_RADIUS={0.12}
-            SPLAT_FORCE={1500}
-            SHADING={false}
-            COLOR_UPDATE_SPEED={3}
-            BACK_COLOR={{ r: 0.02, g: 0.01, b: 0.02 }}
-            TRANSPARENT={true}
-          />
+          {/* Splash Cursor over photo, under text */}
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            {/* Splash Cursor over photo, under text */}
+
+          </div>
         </div>
         
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -722,27 +686,33 @@ export default function HomePage() {
       <section id="love-quotes" className="relative">
         <div ref={loveQuotesSectionRef} className="h-[600vh] relative">
           <div className="sticky top-0 h-screen w-full overflow-hidden">
-            {/* Splash Cursor as background */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
-              <SplashCursor
-                SIM_RESOLUTION={64}
-                DYE_RESOLUTION={512}
-                DENSITY_DISSIPATION={2.5}
-                VELOCITY_DISSIPATION={1.8}
-                PRESSURE={0.05}
-                CURL={1}
-                SPLAT_RADIUS={0.12}
-                SPLAT_FORCE={1500}
-                SHADING={false}
-                COLOR_UPDATE_SPEED={3}
-                BACK_COLOR={{ r: 0.02, g: 0.01, b: 0.02 }}
-                TRANSPARENT={true}
-              />
-            </div>
-            {/* Quotes on top of splash cursor */}
-            {loveQuotes.map((quote, index) => (
-              <LoveQuoteCard key={index} quote={quote} index={index} scrollProgress={quoteScrollProgress} />
-            ))}
+            {/* Splash Cursor as background, only when visible, lower resolution for perf */}
+            {isQuotesVisible && (
+              <div className="absolute inset-0 z-0 pointer-events-none">
+                <SplashCursor
+                  SIM_RESOLUTION={16}
+                  DYE_RESOLUTION={128}
+                  DENSITY_DISSIPATION={2.5}
+                  VELOCITY_DISSIPATION={1.8}
+                  PRESSURE={0.05}
+                  CURL={1}
+                  SPLAT_RADIUS={0.12}
+                  SPLAT_FORCE={1500}
+                  SHADING={false}
+                  COLOR_UPDATE_SPEED={3}
+                  BACK_COLOR={{ r: 0.02, g: 0.01, b: 0.02 }}
+                  TRANSPARENT={true}
+                />
+              </div>
+            )}
+            {/* Only render current, previous, and next quote for perf */}
+            {loveQuotes.map((quote, index) => {
+              const currentQuoteIndex = Math.round(quoteScrollProgress * (loveQuotes.length - 1))
+              if (Math.abs(index - currentQuoteIndex) > 1) return null
+              return (
+                <LoveQuoteCard key={index} quote={quote} index={index} scrollProgress={quoteScrollProgress} />
+              )
+            })}
           </div>
         </div>
       </section>
