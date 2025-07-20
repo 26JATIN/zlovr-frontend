@@ -685,3 +685,40 @@ select:focus {
     transform: translateX(5px);
   }
 }
+
+/* Custom shake animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+  20%, 40%, 60%, 80% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
+}
+.shake {
+  animation: shake 0.7s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Fade in up animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.scroll-fade-in-up {
+  opacity: 0;
+  transition: opacity 0.6s, transform 0.6s;
+}
+.scroll-fade-in-up.animate {
+  animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Animation delay utilities */
+.animate-delay-200 { animation-delay: 0.2s !important; }
+.animate-delay-300 { animation-delay: 0.3s !important; }
+.animate-delay-400 { animation-delay: 0.4s !important; }
+.animate-delay-500 { animation-delay: 0.5s !important; }
+.animate-delay-600 { animation-delay: 0.6s !important; }
