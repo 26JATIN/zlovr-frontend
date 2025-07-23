@@ -74,20 +74,20 @@ export default function InstallButton() {
     <>
       <div className={`install-popup ${showButton ? 'show' : ''}`}>
         <div className="install-content">
-          <span className="install-text">Want to install ZLOVR?</span>
+          <span className="install-text">Install ZLOVR? </span>
           <div className="install-buttons">
             <button 
               className="install-btn" 
               onClick={handleInstallClick}
               disabled={isInstalling}
             >
-              {isInstalling ? 'Installing...' : 'Install'}
+              {isInstalling ? 'Installing...' : 'Yes'}
             </button>
             <button 
               className="cancel-btn" 
               onClick={() => setShowButton(false)}
             >
-              ✕
+              No
             </button>
           </div>
         </div>
@@ -98,6 +98,9 @@ export default function InstallButton() {
           position: fixed;
           z-index: 10000;
           transition: all 0.3s ease-out;
+          background: white;
+          border: 1px solid #e0e0e0;
+          transform: translateY(100%);
         }
 
         /* Mobile: Bottom bar */
@@ -106,135 +109,87 @@ export default function InstallButton() {
             bottom: 0;
             left: 0;
             right: 0;
-            background: white;
             border-top: 1px solid #e0e0e0;
-            transform: translateY(100%);
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
           }
 
           .install-popup.show {
             transform: translateY(0);
           }
-
-          .install-content {
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-          }
-
-          .install-text {
-            font-size: 14px;
-            color: #333;
-            font-weight: 500;
-          }
-
-          .install-buttons {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-          }
-
-          .install-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-          }
-
-          .cancel-btn {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 4px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
         }
 
-        /* Desktop: Small centered popup */
+        /* Desktop: Bottom right popup */
         @media (min-width: 769px) {
           .install-popup {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            opacity: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            border: 1px solid #e0e0e0;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
           }
 
           .install-popup.show {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
+            transform: translateY(0);
           }
+        }
 
-          .install-content {
-            padding: 20px 24px;
-            text-align: center;
-            min-width: 280px;
-          }
+        .install-content {
+          padding: 16px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
 
-          .install-text {
-            font-size: 16px;
-            color: #333;
-            font-weight: 500;
-            margin-bottom: 16px;
-            display: block;
-          }
+        .install-text {
+          font-size: 14px;
+          color: #333;
+          font-weight: 500;
+        }
 
-          .install-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-          }
+        .install-buttons {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
 
-          .install-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s ease;
-          }
+        .install-btn {
+          background: #007bff;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
 
-          .install-btn:hover:not(:disabled) {
-            background: #0056b3;
-          }
+        .install-btn:hover:not(:disabled) {
+          background: #0056b3;
+        }
 
-          .install-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-          }
+        .install-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
 
-          .cancel-btn {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            color: #6c757d;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-          }
+        .cancel-btn {
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          color: #6c757d;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
 
-          .cancel-btn:hover {
-            background: #e9ecef;
-            color: #495057;
-          }
+        .cancel-btn:hover {
+          background: #e9ecef;
+          color: #495057;
         }
       `}</style>
     </>
