@@ -288,6 +288,7 @@ const MatchModal = ({ matchedUser, onClose, onMessage, isSuperLike }) => {
 }
 
 export default function DiscoverPage() {
+  // === MAIN STATE MANAGEMENT ===
   const [users, setUsers] = useState(mockUsers)
   const [currentUserIndex, setCurrentUserIndex] = useState(0)
   const [matchedUser, setMatchedUser] = useState(null)
@@ -296,9 +297,25 @@ export default function DiscoverPage() {
   const [superLikeUsed, setSuperLikeUsed] = useState(false)
   const [superLikeMatch, setSuperLikeMatch] = useState(false)
 
+  // === DESKTOP SPECIFIC STATE ===
+  const [showExpandedPhoto, setShowExpandedPhoto] = useState(false)
+  const [expandedPhotoIndex, setExpandedPhotoIndex] = useState(0)
+  const [clickedPhotoRef, setClickedPhotoRef] = useState(null)
+  const [showLikeModal, setShowLikeModal] = useState(false)
+
+  // === MOBILE SPECIFIC STATE ===
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showProfile, setShowProfile] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [swipeDirection, setSwipeDirection] = useState(null)
+  const [profileImageIndex, setProfileImageIndex] = useState(0)
+  const [isProfileImageDragging, setIsProfileImageDragging] = useState(false)
+  const [showSuperLikeModal, setShowSuperLikeModal] = useState(false)
+
   const currentUser = users[currentUserIndex]
 
-  // Check if mobile
+  // === DEVICE DETECTION ===
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
@@ -308,7 +325,11 @@ export default function DiscoverPage() {
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
+  // === CORE ACTION HANDLERS ===
   const handleLike = () => {
+    // TODO: Backend API call to send like
+    console.log('API: Send like to user:', currentUser.id)
+    
     // Simulate match (30% chance)
     if (Math.random() < 0.3) {
       setMatchedUser(currentUser)
@@ -322,11 +343,17 @@ export default function DiscoverPage() {
   }
 
   const handleRefresh = () => {
+    // TODO: Backend API call to skip user
+    console.log('API: Skip user:', currentUser.id)
     setCurrentUserIndex((prev) => prev + 1)
   }
 
   const handleSuperLike = () => {
     if (superLikeUsed) return
+    
+    // TODO: Backend API call to send super like
+    console.log('API: Send super like to user:', currentUser.id)
+    
     setSuperLikeUsed(true)
     setMatchedUser(currentUser)
     setSuperLikeMatch(true)
@@ -336,23 +363,215 @@ export default function DiscoverPage() {
     }, 1200)
   }
 
+  const handleMessage = () => {
+    // TODO: Backend API call to create conversation
+    console.log('API: Create conversation with user:', matchedUser.id)
+    closeMatchModal()
+    // Navigate to messages would be handled by router
+  }
+
+  // === DESKTOP SPECIFIC HANDLERS ===
+  const handleImageClick = (index, event) => {
+    const clickedElement = event.currentTarget
+    const rect = clickedElement.getBoundingClientRect()
+    setClickedPhotoRef({
+      element: clickedElement,
+      rect: {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      },
+    })
+    setExpandedPhotoIndex(index)
+    setShowExpandedPhoto(true)
+  }
+
+  const handleDesktopLike = () => {
+    setShowLikeModal(false)
+    handleLike()
+  }
+
+  const closeExpandedPhoto = () => {
+    setShowExpandedPhoto(false)
+    setClickedPhotoRef(null)
+  }
+
+  const nextExpandedPhoto = () => {
+    setExpandedPhotoIndex((prev) => (prev + 1) % currentUser.images.length)
+  }
+
+  const prevExpandedPhoto = () => {
+    setExpandedPhotoIndex((prev) => (prev - 1 + currentUser.images.length) % currentUser.images.length)
+  }
+
+  const handleDesktopLikeClick = () => {
+    if (isMobile) {
+      setShowLikeModal(true)
+    } else {
+      handleDesktopLike()
+    }
+  }
+
+  // === MOBILE SPECIFIC HANDLERS ===
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % currentUser.images.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + currentUser.images.length) % currentUser.images.length)
+  }
+
+  const handleDragStart = () => {
+    setIsDragging(true)
+    setSwipeDirection(null)
+  }
+
+  const handleDrag = (event, info) => {
+    const MAX_SWIPE_X = 60
+    let { x } = info.offset
+    // Clamp x to max
+    if (x > MAX_SWIPE_X) x = MAX_SWIPE_X
+    if (x < -MAX_SWIPE_X) x = -MAX_SWIPE_X
+    setDragOffset({ x, y: 0 })
+    if (Math.abs(x) > 16) {
+      setSwipeDirection(x > 0 ? "right" : "left")
+    } else {
+      setSwipeDirection(null)
+    }
+  }
+
+  const handleDragEnd = (event, info) => {
+    setIsDragging(false)
+    setDragOffset({ x: 0, y: 0 })
+    setSwipeDirection(null)
+    const swipeThreshold = 40
+    const velocityThreshold = 250
+    const { x } = info.offset
+    const { x: velocityX } = info.velocity
+    if (Math.abs(x) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
+      if (x > 0 || velocityX > velocityThreshold) {
+        if (navigator.vibrate) navigator.vibrate(30)
+        handleLike()
+      } else if (x < 0 || velocityX < -velocityThreshold) {
+        if (navigator.vibrate) navigator.vibrate(30)
+        handleRefresh()
+      }
+    }
+  }
+
+  const handleImageTap = (event) => {
+    if (isDragging) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    const tapX = event.clientX - rect.left
+    const cardWidth = rect.width
+    if (tapX > cardWidth / 2) {
+      nextImage()
+    } else {
+      prevImage()
+    }
+  }
+
+  const handleCardTap = () => {
+    if (!isDragging) {
+      setProfileImageIndex(currentImageIndex)
+      setShowProfile(true)
+    }
+  }
+
+  const nextProfileImage = () => {
+    setProfileImageIndex((prev) => (prev + 1) % currentUser.images.length)
+  }
+
+  const prevProfileImage = () => {
+    setProfileImageIndex((prev) => (prev - 1 + currentUser.images.length) % currentUser.images.length)
+  }
+
+  const handleSuperLikeModalOpen = () => {
+    if (!superLikeUsed) {
+      setShowSuperLikeModal(true)
+    }
+  }
+
+  const handleSuperLikeConfirm = () => {
+    setShowSuperLikeModal(false)
+    handleSuperLike()
+  }
+
+  // === MODAL HANDLERS ===
   const closeMatchModal = () => {
     setShowMatchModal(false)
     setMatchedUser(null)
     setSuperLikeMatch(false)
   }
 
-  const handleMessage = () => {
-    closeMatchModal()
-    // Navigate to messages would be handled by router
+  const closeProfile = () => {
+    setShowProfile(false)
   }
 
-  // Reset when we run out of users
+  const closeSuperLikeModal = () => {
+    setShowSuperLikeModal(false)
+  }
+
+  const closeLikeModal = () => {
+    setShowLikeModal(false)
+  }
+
+  // === PROFILE IMAGE DRAG HANDLERS ===
+  const handleProfileImageDragStart = () => {
+    setIsProfileImageDragging(true)
+  }
+
+  const handleProfileImageDragEnd = (event, info) => {
+    setIsProfileImageDragging(false)
+    const threshold = 40
+    const velocity = Math.abs(info.velocity.x)
+    if (Math.abs(info.offset.x) > threshold || velocity > 180) {
+      if (info.offset.x > 0 || info.velocity.x > 180) {
+        prevProfileImage()
+      } else {
+        nextProfileImage()
+      }
+    }
+  }
+
+  const setProfileImageIndexDirect = (index) => {
+    setProfileImageIndex(index)
+  }
+
+  // === BROWSER BACK BUTTON HANDLER ===
+  useEffect(() => {
+    if (!showProfile) return
+    window.history.pushState({ profileModal: true }, "")
+    const handlePopState = (e) => {
+      setShowProfile(false)
+    }
+    window.addEventListener("popstate", handlePopState)
+    return () => {
+      window.removeEventListener("popstate", handlePopState)
+      if (window.history.state && window.history.state.profileModal) {
+        window.history.back()
+      }
+    }
+  }, [showProfile])
+
+  // === RESET USERS WHEN END REACHED ===
   useEffect(() => {
     if (currentUserIndex >= users.length) {
       setCurrentUserIndex(0)
     }
   }, [currentUserIndex, users.length])
+
+  // === RESET STATE ON USER CHANGE ===
+  useEffect(() => {
+    setCurrentImageIndex(0)
+    setShowExpandedPhoto(false)
+    setShowProfile(false)
+    setIsDragging(false)
+    setDragOffset({ x: 0, y: 0 })
+    setSwipeDirection(null)
+    setProfileImageIndex(0)
+  }, [currentUserIndex])
 
   if (!currentUser) {
     return (
@@ -400,20 +619,57 @@ export default function DiscoverPage() {
     <>
       {isMobile ? (
         <MobileSwipeLayout 
-          user={currentUser} 
-          onLike={handleLike} 
-          onRefresh={handleRefresh} 
-          onSuperLike={handleSuperLike} 
-          superLikeUsed={superLikeUsed} 
+          user={currentUser}
+          // State
+          currentImageIndex={currentImageIndex}
+          showProfile={showProfile}
+          isDragging={isDragging}
+          dragOffset={dragOffset}
+          swipeDirection={swipeDirection}
+          profileImageIndex={profileImageIndex}
+          isProfileImageDragging={isProfileImageDragging}
+          showSuperLikeModal={showSuperLikeModal}
+          superLikeUsed={superLikeUsed}
+          // Handlers
+          onLike={handleLike}
+          onRefresh={handleRefresh}
+          onSuperLike={handleSuperLikeModalOpen}
+          onSuperLikeConfirm={handleSuperLikeConfirm}
+          onImageTap={handleImageTap}
+          onCardTap={handleCardTap}
+          onDragStart={handleDragStart}
+          onDrag={handleDrag}
+          onDragEnd={handleDragEnd}
+          onNextImage={nextImage}
+          onPrevImage={prevImage}
+          onNextProfileImage={nextProfileImage}
+          onPrevProfileImage={prevProfileImage}
+          onCloseProfile={closeProfile}
+          onCloseSuperLikeModal={closeSuperLikeModal}
+          onProfileImageDragStart={handleProfileImageDragStart}
+          onProfileImageDragEnd={handleProfileImageDragEnd}
+          onSetProfileImageIndex={setProfileImageIndexDirect}
         />
       ) : (
         <DesktopProfileLayout 
-          user={currentUser} 
-          onLike={handleLike} 
-          onRefresh={handleRefresh} 
-          onSuperLike={handleSuperLike} 
-          isMobile={isMobile} 
-          superLikeUsed={superLikeUsed} 
+          user={currentUser}
+          // State
+          showExpandedPhoto={showExpandedPhoto}
+          expandedPhotoIndex={expandedPhotoIndex}
+          clickedPhotoRef={clickedPhotoRef}
+          showLikeModal={showLikeModal}
+          superLikeUsed={superLikeUsed}
+          isMobile={isMobile}
+          // Handlers
+          onLike={handleDesktopLikeClick}
+          onRefresh={handleRefresh}
+          onSuperLike={handleSuperLike}
+          onImageClick={handleImageClick}
+          onCloseExpandedPhoto={closeExpandedPhoto}
+          onNextPhoto={nextExpandedPhoto}
+          onPrevPhoto={prevExpandedPhoto}
+          onDesktopLike={handleDesktopLike}
+          onCloseLikeModal={closeLikeModal}
         />
       )}
 

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Heart,
@@ -58,106 +57,44 @@ const interestIcons = {
   Coding: Code,
 }
 
-const MAX_SWIPE_X = 60; // Maximum px translation for swipe
-const MAX_ROTATE = 3; // Maximum degrees rotation
+const MAX_SWIPE_X = 60
+const MAX_ROTATE = 3
 
-export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superLikeUsed }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [showProfile, setShowProfile] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [swipeDirection, setSwipeDirection] = useState(null)
-  const [profileImageIndex, setProfileImageIndex] = useState(0)
-  const [isProfileImageDragging, setIsProfileImageDragging] = useState(false)
-  const [showSuperLikeModal, setShowSuperLikeModal] = useState(false)
-
-  // --- SWIPE LOGIC ---
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % user.images.length)
-  }
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
-  }
-  const handleDragStart = () => {
-    setIsDragging(true)
-    setSwipeDirection(null)
-  }
-  const handleDrag = (event, info) => {
-    let { x } = info.offset
-    // Clamp x to max
-    if (x > MAX_SWIPE_X) x = MAX_SWIPE_X
-    if (x < -MAX_SWIPE_X) x = -MAX_SWIPE_X
-    setDragOffset({ x, y: 0 })
-    if (Math.abs(x) > 16) {
-      setSwipeDirection(x > 0 ? "right" : "left")
-    } else {
-      setSwipeDirection(null)
-    }
-  }
-  const handleDragEnd = (event, info) => {
-    setIsDragging(false)
-    setDragOffset({ x: 0, y: 0 })
-    setSwipeDirection(null)
-    const swipeThreshold = 40
-    const velocityThreshold = 250
-    const { x } = info.offset
-    const { x: velocityX } = info.velocity
-    if (Math.abs(x) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
-      if (x > 0 || velocityX > velocityThreshold) {
-        if (navigator.vibrate) navigator.vibrate(30)
-        onLike()
-      } else if (x < 0 || velocityX < -velocityThreshold) {
-        if (navigator.vibrate) navigator.vibrate(30)
-        onRefresh()
-      }
-    }
-  }
-  const handleImageTap = (event) => {
-    if (isDragging) return
-    const rect = event.currentTarget.getBoundingClientRect()
-    const tapX = event.clientX - rect.left
-    const cardWidth = rect.width
-    if (tapX > cardWidth / 2) {
-      nextImage()
-    } else {
-      prevImage()
-    }
-  }
-  const handleCardTap = () => {
-    if (!isDragging) {
-      setProfileImageIndex(currentImageIndex)
-      setShowProfile(true)
-    }
-  }
-  const nextProfileImage = () => {
-    setProfileImageIndex((prev) => (prev + 1) % user.images.length)
-  }
-  const prevProfileImage = () => {
-    setProfileImageIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
-  }
-
-  // Handle browser back button to close profile modal
-  useEffect(() => {
-    if (!showProfile) return
-    // Push a new state to history when profile modal opens
-    window.history.pushState({ profileModal: true }, "");
-    const handlePopState = (e) => {
-      setShowProfile(false)
-    }
-    window.addEventListener("popstate", handlePopState)
-    return () => {
-      window.removeEventListener("popstate", handlePopState)
-      // If modal is closing, go back in history if we pushed a state
-      if (window.history.state && window.history.state.profileModal) {
-        window.history.back()
-      }
-    }
-  }, [showProfile])
-
+export const MobileSwipeLayout = ({ 
+  user,
+  // State props
+  currentImageIndex,
+  showProfile,
+  isDragging,
+  dragOffset,
+  swipeDirection,
+  profileImageIndex,
+  isProfileImageDragging,
+  showSuperLikeModal,
+  superLikeUsed,
+  // Handler props
+  onLike,
+  onRefresh,
+  onSuperLike,
+  onSuperLikeConfirm,
+  onImageTap,
+  onCardTap,
+  onDragStart,
+  onDrag,
+  onDragEnd,
+  onNextImage,
+  onPrevImage,
+  onNextProfileImage,
+  onPrevProfileImage,
+  onCloseProfile,
+  onCloseSuperLikeModal,
+  onProfileImageDragStart,
+  onProfileImageDragEnd,
+  onSetProfileImageIndex,
+}) => {
   return (
     <>
       <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-10 overflow-hidden">
-        {/* Main Card Container - slightly above center for better balance */}
         <div className="w-full flex items-center justify-center p-4" style={{ minHeight: '100vh', alignItems: 'flex-start' }}>
           <div style={{ marginTop: '8vh', width: '100%' }}>
             <motion.div
@@ -166,9 +103,9 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
               dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
               dragElastic={0.04}
               dragMomentum={false}
-              onDragStart={handleDragStart}
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
+              onDragStart={onDragStart}
+              onDrag={onDrag}
+              onDragEnd={onDragEnd}
               animate={{
                 x: dragOffset.x,
                 y: 0,
@@ -181,12 +118,11 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                 damping: 40,
                 duration: isDragging ? 0 : 0.25,
               }}
-              onClick={handleCardTap}
+              onClick={onCardTap}
               whileTap={{ scale: 0.98 }}
               style={{ transformOrigin: "center bottom" }}
             >
-              {/* Cover Image */}
-              <div className="relative h-full overflow-hidden" onClick={handleImageTap}>
+              <div className="relative h-full overflow-hidden" onClick={onImageTap}>
                 <motion.div
                   key={currentImageIndex}
                   initial={{ opacity: 0, scale: 1.04 }}
@@ -286,7 +222,7 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
             {!showProfile && (
               <button
                 className={`fixed bottom-28 right-6 z-30 w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-xl flex items-center justify-center border-4 border-white transition-all duration-200 ${superLikeUsed ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
-                onClick={() => !superLikeUsed && setShowSuperLikeModal(true)}
+                onClick={onSuperLike}
                 disabled={superLikeUsed}
                 aria-label="Super Like"
                 style={{ boxShadow: '0 8px 32px 0 rgba(0, 120, 255, 0.18)' }}
@@ -296,15 +232,8 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
             )}
           </div>
         </div>
-        {/* Enhanced Swipe Instructions */}
-        <motion.div
-          className="fixed bottom-32 left-0 right-0 flex justify-center px-8 z-20 pointer-events-none"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-        </motion.div>
       </div>
+
       {/* Super Like Confirmation Modal */}
       <AnimatePresence>
         {showSuperLikeModal && (
@@ -313,7 +242,7 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
-            onClick={() => setShowSuperLikeModal(false)}
+            onClick={onCloseSuperLikeModal}
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0, y: 50 }}
@@ -331,16 +260,13 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setShowSuperLikeModal(false)}
+                  onClick={onCloseSuperLikeModal}
                   className="flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    setShowSuperLikeModal(false)
-                    onSuperLike()
-                  }}
+                  onClick={onSuperLikeConfirm}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold"
                   disabled={superLikeUsed}
                 >
@@ -351,7 +277,8 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
           </motion.div>
         )}
       </AnimatePresence>
-      {/* --- PROFILE MODAL GALLERY IMPROVEMENTS --- */}
+
+      {/* Profile Modal */}
       <AnimatePresence>
         {showProfile && (
           <motion.div
@@ -359,7 +286,7 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black z-50"
-            onClick={() => setShowProfile(false)}
+            onClick={onCloseProfile}
           >
             <motion.div
               initial={{ y: "100%" }}
@@ -370,12 +297,10 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-full overflow-y-auto">
-                {/* Gallery Section - Full Screen */}
                 <div className="relative h-[60vh] flex items-center justify-center bg-slate-100">
-                  {/* Main Image with Swipe Navigation */}
                   <div
                     className="relative h-[90%] w-[90%] max-w-md mx-auto rounded-2xl overflow-hidden shadow-xl flex items-center justify-center"
-                    onClick={() => nextProfileImage()}
+                    onClick={onNextProfileImage}
                     style={{ touchAction: 'pan-y' }}
                   >
                     <motion.div
@@ -387,19 +312,8 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
                       dragElastic={0.12}
-                      onDragStart={() => setIsProfileImageDragging(true)}
-                      onDragEnd={(event, info) => {
-                        setIsProfileImageDragging(false)
-                        const threshold = 40
-                        const velocity = Math.abs(info.velocity.x)
-                        if (Math.abs(info.offset.x) > threshold || velocity > 180) {
-                          if (info.offset.x > 0 || info.velocity.x > 180) {
-                            prevProfileImage()
-                          } else {
-                            nextProfileImage()
-                          }
-                        }
-                      }}
+                      onDragStart={onProfileImageDragStart}
+                      onDragEnd={onProfileImageDragEnd}
                       whileDrag={{ scale: 0.98 }}
                     >
                       <Image
@@ -434,17 +348,14 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                         </div>
                       </div>
                     </motion.div>
-                    {/* Close Button, Counter, Progress overlays unchanged */}
-                    {/* Close Button */}
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => setShowProfile(false)}
+                      onClick={onCloseProfile}
                       className="absolute top-4 right-4 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/30 shadow-lg z-10"
                     >
                       <X className="w-5 h-5" />
                     </motion.button>
-                    {/* Image Counter */}
                     <div className="absolute top-4 left-4 z-10">
                       <div className="px-3 py-1 bg-black/40 backdrop-blur-sm rounded-full border border-white/30">
                         <span className="text-white text-xs font-bold">
@@ -452,12 +363,11 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                         </span>
                       </div>
                     </div>
-                    {/* Enhanced Image Progress Indicators */}
                     <div className="absolute bottom-4 left-4 right-4 flex space-x-2 z-10 justify-center">
                       {user.images.map((_, index) => (
                         <motion.button
                           key={index}
-                          onClick={() => setProfileImageIndex(index)}
+                          onClick={() => onSetProfileImageIndex(index)}
                           className={cn(
                             "h-2 w-6 rounded-full transition-all duration-300 border border-white/30",
                             index === profileImageIndex ? "bg-white shadow-lg" : "bg-white/30",
@@ -489,7 +399,6 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                   </motion.div>
                 </div>
                 <div className="p-6 space-y-6 bg-white">
-                  {/* Header */}
                   <div className="flex items-center space-x-4">
                     <div className="relative">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg">
@@ -516,12 +425,10 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                       </div>
                     </div>
                   </div>
-                  {/* Bio */}
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2 text-base">About</h3>
                     <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-2xl text-sm">{user.bio}</p>
                   </div>
-                  {/* Work & Education */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-gray-50 p-3 rounded-2xl">
                       <div className="flex items-center space-x-2 mb-1">
@@ -538,7 +445,6 @@ export const MobileSwipeLayout = ({ user, onLike, onRefresh, onSuperLike, superL
                       <p className="text-gray-700 font-medium text-xs">{user.education}</p>
                     </div>
                   </div>
-                  {/* Interests */}
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2 text-base">Interests</h3>
                     <div className="flex flex-wrap gap-2">

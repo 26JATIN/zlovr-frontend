@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Heart,
   MapPin,
   Shield,
-  Sparkles,
   RefreshCw,
   Quote,
   ArrowLeft,
@@ -33,7 +32,6 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
-import { cn } from "@/lib/utils"
 
 // Interest icons mapping
 const interestIcons = {
@@ -60,49 +58,27 @@ const interestIcons = {
   Coding: Code,
 }
 
-// Desktop Profile Layout Component
-export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isMobile, superLikeUsed }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [showLikeModal, setShowLikeModal] = useState(false)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [showExpandedPhoto, setShowExpandedPhoto] = useState(false)
-  const [expandedPhotoIndex, setExpandedPhotoIndex] = useState(0)
-  const [clickedPhotoRef, setClickedPhotoRef] = useState(null)
+export const DesktopProfileLayout = ({ 
+  user,
+  // State props
+  showExpandedPhoto,
+  expandedPhotoIndex,
+  clickedPhotoRef,
+  showLikeModal,
+  superLikeUsed,
+  isMobile,
+  // Handler props
+  onLike,
+  onRefresh,
+  onSuperLike,
+  onImageClick,
+  onCloseExpandedPhoto,
+  onNextPhoto,
+  onPrevPhoto,
+  onDesktopLike,
+  onCloseLikeModal,
+}) => {
   const photoRefs = useRef({})
-
-  const handleImageClick = (index, event) => {
-    const clickedElement = event.currentTarget
-    const rect = clickedElement.getBoundingClientRect()
-    setClickedPhotoRef({
-      element: clickedElement,
-      rect: {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-      },
-    })
-    setExpandedPhotoIndex(index)
-    setShowExpandedPhoto(true)
-  }
-
-  const handleLike = () => {
-    setShowLikeModal(false)
-    onLike()
-  }
-
-  const closeExpandedPhoto = () => {
-    setShowExpandedPhoto(false)
-    setClickedPhotoRef(null)
-  }
-
-  const nextPhoto = () => {
-    setExpandedPhotoIndex((prev) => (prev + 1) % user.images.length)
-  }
-
-  const prevPhoto = () => {
-    setExpandedPhotoIndex((prev) => (prev - 1 + user.images.length) % user.images.length)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-7">
@@ -118,7 +94,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
                   whileHover={{ scale: 1.03, y: -8 }}
                   whileTap={{ scale: 0.98 }}
                   className="relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 group"
-                  onClick={(e) => handleImageClick(index, e)}
+                  onClick={(e) => onImageClick(index, e)}
                   layoutId={`photo-${index}`}
                 >
                   <Image
@@ -249,13 +225,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (isMobile) {
-                    setShowLikeModal(true)
-                  } else {
-                    handleLike()
-                  }
-                }}
+                onClick={onLike}
                 className="flex-1 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Heart className="w-6 h-6 mr-3 fill-current" />
@@ -264,7 +234,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
               <motion.button
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => onSuperLike()}
+                onClick={onSuperLike}
                 disabled={superLikeUsed}
                 className={`flex-1 h-16 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 font-bold border-2 border-blue-200 ${superLikeUsed ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
@@ -284,7 +254,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4"
-            onClick={closeExpandedPhoto}
+            onClick={onCloseExpandedPhoto}
           >
             <motion.div
               initial={
@@ -354,7 +324,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={prevPhoto}
+                  onClick={onPrevPhoto}
                   className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
                 >
                   <ChevronLeft className="w-6 h-6" />
@@ -362,7 +332,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={nextPhoto}
+                  onClick={onNextPhoto}
                   className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
                 >
                   <ChevronRight className="w-6 h-6" />
@@ -372,7 +342,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={closeExpandedPhoto}
+                  onClick={onCloseExpandedPhoto}
                   className="absolute top-6 right-6 w-12 h-12 bg-black/30 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white border border-white/30 shadow-lg"
                 >
                   <ArrowLeft className="w-6 h-6" />
@@ -401,7 +371,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
-              onClick={() => setShowLikeModal(false)}
+              onClick={onCloseLikeModal}
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0, y: 50 }}
@@ -421,7 +391,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
                   </div>
                   <div className="space-y-4">
                     <Button
-                      onClick={handleLike}
+                      onClick={onDesktopLike}
                       className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-2xl py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       <Heart className="w-5 h-5 mr-3 fill-current" />
@@ -429,7 +399,7 @@ export const DesktopProfileLayout = ({ user, onLike, onRefresh, onSuperLike, isM
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setShowLikeModal(false)}
+                      onClick={onCloseLikeModal}
                       className="w-full border-2 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-2xl py-3 font-semibold text-lg"
                     >
                       Maybe Later
