@@ -19,8 +19,13 @@ import {
   Shield,
   MapPin,
   MessageCircle,
+  Image as ImageIcon,
+  Smile,
+  Search,
+  Filter,
+  Heart,
 } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
@@ -85,12 +90,169 @@ const mockMatch = {
   unreadCount: 2,
 }
 
+// Enhanced Chat Header Component
+const ChatHeader = ({ match, onBack }) => {
+  return (
+    <motion.div 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+    >
+      <div className="flex items-center justify-between p-4 sm:p-6">
+        {/* Left side - Back button and user info */}
+        <div className="flex items-center space-x-4 flex-1">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
+          </motion.button>
+          
+          <div className="flex items-center space-x-3 flex-1">
+            <div className="relative">
+              <Avatar className="w-12 h-12 ring-2 ring-white shadow-sm">
+                <AvatarImage src={match.user.images[0].url} alt={match.user.name} />
+                <AvatarFallback className="bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 font-semibold">
+                  {match.user.name[0]}
+                </AvatarFallback>
+              </Avatar>
+              {match.user.online && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-full h-full bg-green-400 rounded-full"
+                  />
+                </motion.div>
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <h2 className="font-bold text-gray-900 truncate text-lg">{match.user.name}</h2>
+                {match.user.verified && (
+                  <Shield className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                )}
+              </div>
+              <div className="flex items-center space-x-1 text-sm text-gray-500">
+                <div className={cn(
+                  "w-2 h-2 rounded-full transition-colors duration-300",
+                  match.user.online ? "bg-green-500" : "bg-gray-400"
+                )} />
+                <span className="font-medium">
+                  {match.user.online ? "Active now" : match.user.lastSeen}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right side - Action buttons */}
+        <div className="flex items-center space-x-2">
+          {[
+            { icon: Phone, label: "Call" },
+            { icon: Video, label: "Video call" },
+            { icon: MoreHorizontal, label: "More options" }
+          ].map(({ icon: Icon, label }) => (
+            <motion.button
+              key={label}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
+              aria-label={label}
+            >
+              <Icon className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Enhanced Messages List Header
+const MessagesListHeader = () => {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
+
+  return (
+    <motion.div 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+    >
+      <div className="p-4 sm:p-6 space-y-4">
+        {/* Top row - Title and actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-sm">
+              <MessageCircle className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Messages</h1>
+              <p className="text-sm text-gray-500 font-medium">Stay connected with your matches</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push("/dating/matches")}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">View Matches</span>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+            >
+              <Settings className="w-5 h-5 text-gray-600" />
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Search and filter row */}
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search conversations..."
+              className="pl-10 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-all duration-200"
+            />
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200"
+          >
+            <Filter className="w-4 h-4 text-gray-600" />
+          </motion.button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 // Enhanced Chat Component
 const Chat = ({ match, onBack }) => {
   const [messages, setMessages] = useState(mockMessages)
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const messagesEndRef = useRef(null)
+  const inputRef = useRef(null)
   const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
 
   const scrollToBottom = () => {
@@ -101,155 +263,219 @@ const Chat = ({ match, onBack }) => {
     scrollToBottom()
   }, [messages])
 
-  const sendMessage = () => {
-    if (!newMessage.trim()) return
+  const sendMessage = async () => {
+    if (!newMessage.trim() || isSending) return
 
-    const message = {
-      id: messages.length + 1,
-      text: newMessage,
-      timestamp: new Date().toISOString(),
-      sender: "me",
-      status: "sent",
-    }
-
-    setMessages([...messages, message])
+    setIsSending(true)
+    const messageText = newMessage
     setNewMessage("")
 
-    // Simulate typing indicator
-    setIsTyping(true)
+    const message = {
+      id: Date.now(),
+      text: messageText,
+      timestamp: new Date().toISOString(),
+      sender: "me",
+      status: "sending",
+    }
+
+    setMessages(prev => [...prev, message])
+
+    // Simulate sending delay
     setTimeout(() => {
-      setIsTyping(false)
-      // Simulate response
-      const response = {
-        id: messages.length + 2,
-        text: "That sounds great! I'd love to do that 😊",
-        timestamp: new Date().toISOString(),
-        sender: "them",
-        status: "read",
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === message.id ? { ...msg, status: "sent" } : msg
+        )
+      )
+      setIsSending(false)
+
+      // Simulate typing indicator
+      setIsTyping(true)
+      setTimeout(() => {
+        setIsTyping(false)
+        const response = {
+          id: Date.now() + 1,
+          text: "That sounds great! I'd love to do that 😊",
+          timestamp: new Date().toISOString(),
+          sender: "them",
+          status: "read",
+        }
+        setMessages(prev => [...prev, response])
+      }, 1500 + Math.random() * 1000)
+    }, 300)
+  }
+
+  const messageVariants = {
+    initial: { opacity: 0, y: 20, scale: 0.95 },
+    animate: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
       }
-      setMessages((prev) => [...prev, response])
-    }, 2000)
+    },
+    exit: { opacity: 0, y: -20, scale: 0.95 }
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <Header 
-        title={match.user.name}
-        onBack={onBack}
-        sidebarCollapsed={sidebarCollapsed}
-        isMobile={isMobile}
-        actions={
-          <div className="flex space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-            >
-              <Phone className="w-4 h-4 text-gray-700" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-            >
-              <Video className="w-4 h-4 text-gray-700" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
-            >
-              <MoreHorizontal className="w-4 h-4 text-gray-700" />
-            </Button>
-          </div>
-        }
-      />
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
+      <ChatHeader match={match} onBack={onBack} />
 
-      {/* Enhanced Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 pt-20">
-        {messages.map((message, index) => (
-          <motion.div
-            key={message.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className={cn("flex", message.sender === "me" ? "justify-end" : "justify-start")}
-          >
-            <div
-              className={cn(
-                "max-w-[75%] p-4 rounded-3xl shadow-sm",
-                message.sender === "me"
-                  ? "bg-gradient-to-br from-slate-700 to-slate-900 text-white rounded-br-lg"
-                  : "bg-white text-gray-900 rounded-bl-lg border border-gray-100",
-              )}
+      {/* Enhanced Messages with improved animations */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+        <AnimatePresence mode="popLayout">
+          {messages.map((message, index) => (
+            <motion.div
+              key={message.id}
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              layout
+              className={cn("flex", message.sender === "me" ? "justify-end" : "justify-start")}
             >
-              <p className="text-sm font-medium leading-relaxed">{message.text}</p>
-              <div className="flex items-center justify-end space-x-2 mt-2">
-                <span className="text-xs opacity-70 font-medium">
-                  {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </span>
-                {message.sender === "me" && (
-                  <div className="text-xs opacity-70">
-                    {message.status === "sent" && <Check className="w-3 h-3" />}
-                    {message.status === "delivered" && <CheckCheck className="w-3 h-3" />}
-                    {message.status === "read" && <CheckCheck className="w-3 h-3 text-blue-400" />}
-                  </div>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className={cn(
+                  "max-w-[80%] sm:max-w-[75%] p-3 sm:p-4 rounded-3xl shadow-sm relative",
+                  "transition-all duration-300",
+                  message.sender === "me"
+                    ? "bg-gradient-to-br from-slate-700 to-slate-900 text-white rounded-br-lg ml-auto"
+                    : "bg-white text-gray-900 rounded-bl-lg border border-gray-100 shadow-md hover:shadow-lg",
                 )}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+              >
+                <p className="text-sm sm:text-base font-medium leading-relaxed break-words">
+                  {message.text}
+                </p>
+                <div className="flex items-center justify-end space-x-2 mt-2">
+                  <span className="text-xs opacity-70 font-medium">
+                    {new Date(message.timestamp).toLocaleTimeString([], { 
+                      hour: "2-digit", 
+                      minute: "2-digit" 
+                    })}
+                  </span>
+                  {message.sender === "me" && (
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="text-xs opacity-70"
+                    >
+                      {message.status === "sending" && (
+                        <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                      )}
+                      {message.status === "sent" && <Check className="w-3 h-3" />}
+                      {message.status === "delivered" && <CheckCheck className="w-3 h-3" />}
+                      {message.status === "read" && <CheckCheck className="w-3 h-3 text-blue-400" />}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
-        {isTyping && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
-            <div className="bg-white p-4 rounded-3xl rounded-bl-lg shadow-sm border border-gray-100">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
-                <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
-                  style={{ animationDelay: "0.4s" }}
-                ></div>
+        {/* Enhanced typing indicator */}
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="flex justify-start"
+            >
+              <div className="bg-white p-4 rounded-3xl rounded-bl-lg shadow-lg border border-gray-100">
+                <div className="flex space-x-1.5">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-2 h-2 bg-gray-400 rounded-full"
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        delay: i * 0.2,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Enhanced Message Input */}
-      <div className="bg-white/95 backdrop-blur-xl border-t border-gray-100/50 p-4 sm:p-6 shadow-sm">
-        <div className="flex items-center space-x-3 sm:space-x-4">
+      {/* Enhanced Message Input with better animations */}
+      <motion.div 
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white/95 backdrop-blur-xl border-t border-gray-200/50 p-4 sm:p-6 shadow-lg"
+      >
+        <div className="flex items-end space-x-3 sm:space-x-4">
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 sm:p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95"
+            className="p-2.5 sm:p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95 hover:scale-105 mb-1"
           >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
           </Button>
+          
           <div className="flex-1 relative">
             <Input
+              ref={inputRef}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message..."
-              className="pr-12 sm:pr-14 rounded-2xl border-gray-200 bg-gray-50 focus:bg-white transition-all duration-200 font-medium py-2.5 sm:py-3 text-sm sm:text-base"
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+              className={cn(
+                "pr-12 sm:pr-14 rounded-2xl border-gray-200 bg-gray-50 focus:bg-white",
+                "transition-all duration-300 font-medium py-3 sm:py-3.5 text-sm sm:text-base",
+                "focus:ring-2 focus:ring-slate-200 focus:border-slate-300",
+                "placeholder:text-gray-400"
+              )}
+              onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+              disabled={isSending}
             />
-            <Button
-              onClick={sendMessage}
-              size="sm"
-              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded-xl w-8 h-8 sm:w-10 sm:h-10 p-0 bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-800 hover:to-slate-950 transition-all duration-200 active:scale-95"
-              disabled={!newMessage.trim()}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Send className="w-3 h-3 sm:w-4 sm:h-4" />
-            </Button>
+              <Button
+                onClick={sendMessage}
+                size="sm"
+                className={cn(
+                  "absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 rounded-xl",
+                  "w-8 h-8 sm:w-10 sm:h-10 p-0 transition-all duration-200",
+                  "bg-gradient-to-br from-slate-700 to-slate-900",
+                  "hover:from-slate-800 hover:to-slate-950",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  newMessage.trim() ? "scale-100" : "scale-90 opacity-70"
+                )}
+                disabled={!newMessage.trim() || isSending}
+              >
+                <Send className="w-3 h-3 sm:w-4 sm:h-4" />
+              </Button>
+            </motion.div>
           </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-2.5 sm:p-3 hover:bg-gray-100/80 rounded-xl transition-all duration-200 active:scale-95 hover:scale-105 mb-1"
+          >
+            <Smile className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+          </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -286,7 +512,7 @@ const MessagesPageContent = () => {
   return <MessagesList onSelectMatch={handleSelectMatch} />
 }
 
-// Messages List Component
+// Enhanced Messages List Component - focused on conversations only
 const MessagesList = ({ onSelectMatch }) => {
   const router = useRouter()
   const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
@@ -371,84 +597,175 @@ const MessagesList = ({ onSelectMatch }) => {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header 
-        title="Messages"
-        sidebarCollapsed={sidebarCollapsed}
-        isMobile={isMobile}
-        actions={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dating/matches")}
-            className="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200"
-          >
-            View Matches
-          </Button>
-        }
-      />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
+      <MessagesListHeader />
 
-      {/* Messages List */}
-      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto space-y-4">
-          {conversations.length > 0 ? (
-            conversations.map((conversation, index) => (
-              <motion.div
-                key={conversation.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-center space-x-4 p-4 bg-white rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 transform hover:scale-[1.02] active:scale-[0.98]"
-                onClick={() => onSelectMatch(conversation)}
-              >
-                <div className="relative">
-                  <Avatar className="w-16 h-16 ring-2 ring-gray-100">
-                    <AvatarImage src={conversation.user.images[0].url || "/placeholder.svg"} alt={conversation.user.name} />
-                    <AvatarFallback className="bg-gray-100 text-gray-600 font-semibold">{conversation.user.name[0]}</AvatarFallback>
-                  </Avatar>
-                  {conversation.user.online && (
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-bold text-gray-900 truncate text-lg tracking-tight">{conversation.user.name}</h3>
-                      {conversation.user.verified && (
-                        <Shield className="w-4 h-4 text-blue-500" />
-                      )}
-                    </div>
-                    <span className="text-xs text-gray-500 font-medium">
-                      {new Date(conversation.lastMessage.timestamp).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 truncate font-medium mt-1">{conversation.lastMessage.text}</p>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <MapPin className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">{conversation.user.location}</span>
-                  </div>
-                </div>
-
-                {conversation.unreadCount > 0 && (
-                  <Badge className="bg-red-500 text-white min-w-[24px] h-6 rounded-full text-xs flex items-center justify-center font-bold shadow-sm">
-                    {conversation.unreadCount}
-                  </Badge>
-                )}
-              </motion.div>
-            ))
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages yet</h3>
-              <p className="text-gray-600 mb-6">Start a conversation with your matches!</p>
-              <Button onClick={() => router.push("/dating/matches")}>
-                View Matches
-              </Button>
+      {/* Conversations Stats */}
+      <div className="px-4 sm:px-6 py-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+              <div className="text-2xl font-bold text-slate-700">{conversations.length}</div>
+              <div className="text-xs text-gray-600 font-medium">Active Chats</div>
             </div>
-          )}
+            <div className="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+              <div className="text-2xl font-bold text-green-600">
+                {conversations.filter(c => c.user.online).length}
+              </div>
+              <div className="text-xs text-gray-600 font-medium">Online Now</div>
+            </div>
+            <div className="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+              <div className="text-2xl font-bold text-red-500">
+                {conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
+              </div>
+              <div className="text-xs text-gray-600 font-medium">Unread</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Conversations List */}
+      <div className="px-4 sm:px-6 pb-32">
+        <div className="max-w-2xl mx-auto space-y-3">
+          <AnimatePresence mode="popLayout">
+            {conversations.length > 0 ? (
+              conversations.map((conversation, index) => (
+                <motion.div
+                  key={conversation.id}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ 
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    y: -2,
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center space-x-4 p-4 sm:p-5 bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 backdrop-blur-sm group"
+                  onClick={() => onSelectMatch(conversation)}
+                >
+                  <div className="relative">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                      <Avatar className="w-14 h-14 sm:w-16 sm:h-16 ring-2 ring-gray-100 shadow-md group-hover:ring-slate-200 transition-all duration-300">
+                        <AvatarImage src={conversation.user.images[0].url || "/placeholder.svg"} alt={conversation.user.name} />
+                        <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 font-semibold text-lg">
+                          {conversation.user.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </motion.div>
+                    <AnimatePresence>
+                      {conversation.user.online && (
+                        <motion.div 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"
+                        >
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="w-full h-full bg-green-400 rounded-full"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-bold text-gray-900 truncate text-base sm:text-lg tracking-tight group-hover:text-slate-700 transition-colors duration-300">
+                          {conversation.user.name}
+                        </h3>
+                        {conversation.user.verified && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <Shield className="w-4 h-4 text-blue-500" />
+                          </motion.div>
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500 font-medium">
+                        {new Date(conversation.lastMessage.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate font-medium mb-2 group-hover:text-gray-700 transition-colors duration-300">
+                      {conversation.lastMessage.sender === "me" ? "You: " : ""}{conversation.lastMessage.text}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-1 text-xs text-gray-500">
+                        <MapPin className="w-3 h-3" />
+                        <span>{conversation.user.location}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {conversation.unreadCount > 0 && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      >
+                        <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white min-w-[24px] h-6 rounded-full text-xs flex items-center justify-center font-bold shadow-lg">
+                          {conversation.unreadCount}
+                        </Badge>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-16"
+              >
+                <motion.div
+                  animate={{ 
+                    rotate: [0, -10, 10, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatDelay: 3
+                  }}
+                  className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+                >
+                  <MessageCircle className="w-10 h-10 text-gray-400" />
+                </motion.div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">No conversations yet</h3>
+                <p className="text-gray-600 mb-8 max-w-sm mx-auto leading-relaxed">
+                  Start a conversation with your matches and create meaningful connections!
+                </p>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button 
+                    onClick={() => router.push("/dating/matches")}
+                    className="bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-slate-950"
+                  >
+                    <Heart className="w-4 h-4 mr-2" />
+                    Find Matches
+                  </Button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

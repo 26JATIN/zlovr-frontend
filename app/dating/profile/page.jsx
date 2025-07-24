@@ -41,11 +41,13 @@ import {
   X,
   Star,
   CreditCard,
+  MessageCircle,
 } from "lucide-react"
 import Image from "next/image"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
 import { useDatingLayout } from "../layout"
+import { useRouter } from "next/navigation"
 
 // Interest icons mapping
 const interestIcons = {
@@ -82,6 +84,63 @@ const interestIcons = {
   Startups: Code,
   Sustainability: Mountain,
   Wellness: Heart,
+}
+
+// Enhanced Profile Header Component
+const ProfileHeader = () => {
+  const router = useRouter()
+
+  return (
+    <motion.div
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+    >
+      <div className="p-4 sm:p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-sm">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Profile</h1>
+              <p className="text-sm text-gray-500 font-medium">Manage your dating profile</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push("/dating/matches")}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">Matches</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push("/dating/messages")}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Messages</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+            >
+              <Settings className="w-5 h-5 text-gray-600" />
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
 }
 
 // Enhanced Profile Settings Component
@@ -200,9 +259,36 @@ const ProfileSettings = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Edit Profile" onBack={onBack} sidebarCollapsed={sidebarCollapsed} isMobile={isMobile} />
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+      >
+        <div className="flex items-center justify-between p-4 sm:p-6">
+          <div className="flex items-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </motion.button>
 
-      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6 max-w-4xl mx-auto">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-sm">
+                <Edit className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Edit Profile</h1>
+                <p className="text-sm text-gray-500 font-medium">Update your dating information</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="pt-4 pb-32 px-4 sm:px-6 max-w-4xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
           {/* Section Navigation */}
           <div className="lg:w-64 flex-shrink-0">
@@ -784,7 +870,6 @@ const ProfileSettings = ({ onBack }) => {
 
 export default function ProfilePage() {
   const [showEditProfile, setShowEditProfile] = useState(false)
-  const { Header, sidebarCollapsed, isMobile } = useDatingLayout()
 
   if (showEditProfile) {
     return <ProfileSettings onBack={() => setShowEditProfile(false)} />
@@ -792,8 +877,8 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Profile" sidebarCollapsed={sidebarCollapsed} isMobile={isMobile} />
-      <div className="pt-16 sm:pt-18 pb-32 px-4 sm:px-6">
+      <ProfileHeader />
+      <div className="pt-4 pb-32 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
           {/* Enhanced Profile Preview */}
           <Card className="p-4 sm:p-6 md:p-8 bg-white shadow-sm border border-gray-100 rounded-2xl sm:rounded-3xl">
