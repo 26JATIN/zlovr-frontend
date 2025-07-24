@@ -364,8 +364,8 @@ const DatingLayoutContent = ({ children }) => {
     verifiedOnly: false,
   })
 
-  // Check if we're in a chat view (has match parameter)
-  const isInChat = searchParams?.get("match")
+  // Check if we're in a chat view (check for both matchId param and chat path)
+  const isInChat = pathname.includes('/messages/chat') || searchParams?.get("matchId")
 
   // Check if mobile
   useEffect(() => {
@@ -426,7 +426,7 @@ const DatingLayoutContent = ({ children }) => {
           {children}
         </div>
         
-        {/* Only show bottom navigation if not in a chat */}
+        {/* Only show bottom navigation if not in a chat and on mobile */}
         {!isInChat && (
           <Suspense fallback={null}>
             <BottomNavigation 

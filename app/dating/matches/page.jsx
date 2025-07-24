@@ -4,94 +4,179 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Heart, MessageCircle, MapPin, Shield, Users, Clock, Sparkles, TrendingUp, Star, Settings, Filter, Search } from 'lucide-react'
+import { 
+  Heart, 
+  MessageCircle, 
+  MapPin, 
+  Shield, 
+  Users, 
+  Clock, 
+  Sparkles, 
+  TrendingUp, 
+  Star, 
+  Settings, 
+  Filter, 
+  Search,
+  ArrowLeft,
+  Quote,
+  Briefcase,
+  GraduationCap,
+  Mountain,
+  CameraIcon,
+  Plane,
+  Coffee,
+  Dog,
+  Palette,
+  Headphones,
+  Utensils,
+  Book,
+  Film,
+  Dumbbell,
+  Music,
+  Code,
+  Gamepad2,
+  X
+} from 'lucide-react'
 import { motion, AnimatePresence } from "motion/react"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import { useDatingLayout } from "../layout"
 import { Input } from "@/components/ui/input"
+import Image from "next/image"
+import { ProfileModal } from "./components/ProfileModal"
 
-// Mock data for matches
+// Mock data for matches - Add story field to images
 const mockMatches = [
-	{
-		id: 1,
-		user: {
-			id: 1,
-			name: "Emma",
-			age: 26,
-			location: "2 miles away",
-			bio: "Adventure seeker, coffee lover, and dog mom 🐕☕️",
-			images: [
-				{
-					url: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop&crop=face",
-					title: "Weekend Adventures",
-				}
-			],
-			verified: true,
-			online: true,
-			lastSeen: "Active now",
-		},
-		matchedAt: "2024-01-15T10:30:00Z",
-		lastMessage: {
-			text: "Hey! Thanks for the match 😊",
-			timestamp: "2024-01-15T14:30:00Z",
-			sender: "them",
-		},
-		unreadCount: 2,
-	},
-	{
-		id: 2,
-		user: {
-			id: 2,
-			name: "Sofia",
-			age: 24,
-			location: "5 miles away",
-			bio: "Artist by day, dreamer by night 🎨✨",
-			images: [
-				{
-					url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop&crop=face",
-					title: "Creative Process",
-				}
-			],
-			verified: true,
-			online: false,
-			lastSeen: "2 hours ago",
-		},
-		matchedAt: "2024-01-14T16:45:00Z",
-		lastMessage: {
-			text: "Would love to check out that art gallery you mentioned!",
-			timestamp: "2024-01-14T18:20:00Z",
-			sender: "me",
-		},
-		unreadCount: 0,
-	},
-	{
-		id: 3,
-		user: {
-			id: 3,
-			name: "Lisa",
-			age: 28,
-			location: "1 mile away",
-			bio: "Fitness enthusiast and foodie 🏃‍♀️🍕",
-			images: [
-				{
-					url: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=600&fit=crop&crop=face",
-					title: "Morning Miles",
-				}
-			],
-			verified: false,
-			online: true,
-			lastSeen: "Active now",
-		},
-		matchedAt: "2024-01-13T09:15:00Z",
-		lastMessage: {
-			text: "That hiking trail looks amazing! When are you free to go?",
-			timestamp: "2024-01-13T11:45:00Z",
-			sender: "them",
-		},
-		unreadCount: 1,
-	},
+  {
+    id: 1,
+    user: {
+      id: 1,
+      name: "Emma",
+      age: 26,
+      location: "2 miles away",
+      bio: "Adventure seeker, coffee lover, and dog mom 🐕☕️",
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop&crop=face",
+          title: "Weekend Adventures",
+          story: "Love exploring new hiking trails every weekend. This was taken at my favorite spot overlooking the valley."
+        },
+        {
+          url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop&crop=face",
+          title: "Creative Process",
+          story: "Working on my latest art project. I find inspiration in everyday moments and try to capture them on canvas."
+        },
+        {
+          url: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop&crop=face",
+          title: "City Life",
+          story: "Exploring downtown after a great dinner with friends. I love how the city lights create such beautiful patterns."
+        }
+      ],
+      verified: true,
+      online: true,
+      lastSeen: "Active now",
+      interests: ["Hiking", "Photography", "Coffee", "Dogs", "Travel"],
+      job: "Graphic Designer",
+      education: "Art Institute"
+    },
+    matchedAt: "2024-01-15T10:30:00Z",
+    lastMessage: {
+      text: "Hey! Thanks for the match 😊",
+      timestamp: "2024-01-15T14:30:00Z",
+      sender: "them",
+    },
+    unreadCount: 2,
+  },
+  {
+    id: 2,
+    user: {
+      id: 2,
+      name: "Sofia",
+      age: 24,
+      location: "5 miles away",
+      bio: "Artist by day, dreamer by night 🎨✨",
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop&crop=face",
+          title: "Creative Process",
+          story: "In my studio working on a new painting series. Art is my way of expressing emotions that words can't capture."
+        },
+        {
+          url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop&crop=face",
+          title: "Art Studio",
+          story: "My happy place where all the magic happens. Surrounded by colors, brushes, and endless possibilities."
+        }
+      ],
+      verified: true,
+      online: false,
+      lastSeen: "2 hours ago",
+      interests: ["Art", "Museums", "Music", "Coffee", "Reading"],
+      job: "Fine Artist",
+      education: "Fine Arts University"
+    },
+    matchedAt: "2024-01-14T16:45:00Z",
+    lastMessage: {
+      text: "Would love to check out that art gallery you mentioned!",
+      timestamp: "2024-01-14T18:20:00Z",
+      sender: "me",
+    },
+    unreadCount: 0,
+  },
+  {
+    id: 3,
+    user: {
+      id: 3,
+      name: "Lisa",
+      age: 28,
+      location: "1 mile away",
+      bio: "Fitness enthusiast and foodie 🏃‍♀️🍕",
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=600&fit=crop&crop=face",
+          title: "Morning Miles",
+          story: "Starting my day with a 5-mile run. Nothing beats the feeling of accomplishment and those endorphins!"
+        }
+      ],
+      verified: false,
+      online: true,
+      lastSeen: "Active now",
+      interests: ["Fitness", "Running", "Cooking", "Wine", "Travel"],
+      job: "Personal Trainer",
+      education: "Sports Science Degree"
+    },
+    matchedAt: "2024-01-13T09:15:00Z",
+    lastMessage: {
+      text: "That hiking trail looks amazing! When are you free to go?",
+      timestamp: "2024-01-13T11:45:00Z",
+      sender: "them",
+    },
+    unreadCount: 1,
+  },
 ]
+
+// Interest icons mapping
+const interestIcons = {
+  Hiking: Mountain,
+  Photography: CameraIcon,
+  Travel: Plane,
+  Yoga: Users,
+  Coffee: Coffee,
+  Dogs: Dog,
+  Art: Palette,
+  Music: Headphones,
+  Cooking: Utensils,
+  Reading: Book,
+  Museums: GraduationCap,
+  Wine: Utensils,
+  Dancing: Music,
+  Theater: Film,
+  Fitness: Dumbbell,
+  Food: Utensils,
+  Movies: Film,
+  Running: Dumbbell,
+  Technology: Code,
+  Gaming: Gamepad2,
+  Coding: Code,
+}
 
 // Enhanced Matches Header - Made responsive and thinner
 const MatchesHeader = () => {
@@ -102,7 +187,7 @@ const MatchesHeader = () => {
     <motion.div 
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+      className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
     >
       <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
         {/* Top row - Title and actions */}
@@ -417,15 +502,149 @@ const StatsCard = ({ icon: Icon, value, label, color = "slate", delay = 0, subti
 
 export default function MatchesPage() {
   const router = useRouter()
-  const [matches, setMatches] = useState(mockMatches)
+  
+  // === STATE MANAGEMENT ===
+  const [matches, setMatches] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredMatches, setFilteredMatches] = useState([])
+  
+  // === PROFILE MODAL STATE ===
+  const [selectedMatch, setSelectedMatch] = useState(null)
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
+  // === DATA FETCHING ===
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        setIsLoading(true)
+        // TODO: Replace with actual API call
+        console.log('API: Fetch matches for current user')
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        setMatches(mockMatches)
+      } catch (err) {
+        console.error('Failed to fetch matches:', err)
+        setError('Failed to load matches. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchMatches()
+  }, [])
+
+  // === SEARCH FILTERING ===
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredMatches(matches)
+    } else {
+      const filtered = matches.filter(match =>
+        match.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.user.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.user.location.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setFilteredMatches(filtered)
+    }
+  }, [searchQuery, matches])
+
+  // === ACTION HANDLERS ===
   const handleSelectMatch = (match) => {
-    // Navigate to user profile or detailed view
-    console.log("View profile for:", match.user.name)
+    // TODO: Log user profile view for analytics
+    console.log('API: Log profile view for user:', match.user.id)
+    
+    setSelectedMatch(match)
+    setCurrentImageIndex(0)
+    setShowProfileModal(true)
   }
 
   const handleMessageMatch = (match) => {
-    router.push(`/dating/messages?match=${match.id}`)
+    // TODO: Create conversation if it doesn't exist
+    console.log('API: Create or get conversation with user:', match.user.id)
+    
+    router.push(`/dating/messages/chat?matchId=${match.id}`)
+  }
+
+  const handleCloseProfile = () => {
+    setShowProfileModal(false)
+    setSelectedMatch(null)
+    setCurrentImageIndex(0)
+  }
+
+  const handleImageChange = (index) => {
+    setCurrentImageIndex(index)
+  }
+
+  const handleNextImage = () => {
+    if (selectedMatch && selectedMatch.user.images) {
+      setCurrentImageIndex((prev) => 
+        (prev + 1) % selectedMatch.user.images.length
+      )
+    }
+  }
+
+  const handlePrevImage = () => {
+    if (selectedMatch && selectedMatch.user.images) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? selectedMatch.user.images.length - 1 : prev - 1
+      )
+    }
+  }
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value)
+  }
+
+  const handleFilter = () => {
+    // TODO: Implement filter functionality
+    console.log('Show filter options')
+  }
+
+  const handleViewDiscover = () => {
+    router.push("/dating")
+  }
+
+  const handleViewMessages = () => {
+    router.push("/dating/messages")
+  }
+
+  const handleSettings = () => {
+    // TODO: Navigate to matches settings
+    console.log('Navigate to matches settings')
+  }
+
+  // === LOADING STATE ===
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-700 mx-auto"></div>
+          <p className="text-gray-600">Loading matches...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // === ERROR STATE ===
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-red-500 text-2xl">!</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
+          <p className="text-gray-600">{error}</p>
+          <Button onClick={() => window.location.reload()} className="bg-slate-700 hover:bg-slate-800">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   const stats = [
@@ -457,7 +676,79 @@ export default function MatchesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
-      <MatchesHeader />
+      {/* Enhanced Matches Header */}
+      <motion.div 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+      >
+        <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
+          {/* Top row - Title and actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-sm">
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">Matches</h1>
+                <p className="text-xs sm:text-sm text-gray-500 font-medium hidden sm:block">People who liked you back</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleViewDiscover}
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Discover</span>
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleViewMessages}
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Messages</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSettings}
+                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-all duration-200"
+              >
+                <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Search and filter row */}
+          <div className="flex items-center space-x-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search matches..."
+                className="pl-10 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-all duration-200"
+              />
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFilter}
+              className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200"
+            >
+              <Filter className="w-4 h-4 text-gray-600" />
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
 
       <div className="px-4 sm:px-6 pb-32">
         <div className="max-w-4xl mx-auto">
@@ -496,8 +787,8 @@ export default function MatchesPage() {
             </motion.div>
 
             <AnimatePresence mode="popLayout">
-              {matches.length > 0 ? (
-                matches.map((match, index) => (
+              {filteredMatches.length > 0 ? (
+                filteredMatches.map((match, index) => (
                   <MatchCard
                     key={match.id}
                     match={match}
@@ -506,6 +797,18 @@ export default function MatchesPage() {
                     onMessage={handleMessageMatch}
                   />
                 ))
+              ) : searchQuery ? (
+                <motion.div 
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-16"
+                >
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">No results found</h3>
+                  <p className="text-gray-600">Try searching with different keywords.</p>
+                </motion.div>
               ) : (
                 <motion.div 
                   initial={{ opacity: 0, y: 40 }}
@@ -535,7 +838,7 @@ export default function MatchesPage() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button 
-                      onClick={() => router.push("/dating/discover")}
+                      onClick={handleViewDiscover}
                       className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800"
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
@@ -548,6 +851,18 @@ export default function MatchesPage() {
           </div>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal
+        match={selectedMatch}
+        isOpen={showProfileModal}
+        onClose={handleCloseProfile}
+        onMessage={handleMessageMatch}
+        currentImageIndex={currentImageIndex}
+        onImageChange={handleImageChange}
+        onPrevImage={handlePrevImage}
+        onNextImage={handleNextImage}
+      />
     </div>
   )
 }

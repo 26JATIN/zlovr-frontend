@@ -42,6 +42,7 @@ import {
   Star,
   CreditCard,
   MessageCircle,
+  ArrowLeft,
 } from "lucide-react"
 import Image from "next/image"
 import { motion } from "motion/react"
